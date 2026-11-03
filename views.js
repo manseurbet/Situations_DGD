@@ -91,7 +91,7 @@ const nc=lo?6:7,pzr="";
 return ch+`<div class="card">
 <div class="np" style="margin:8px 0">${IMPORT_FILE_ON?`<label class="btn pri">📄 Importer un devis<input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="imp(this)"></label>`:`<button disabled title="Bientôt disponible" style="opacity:.45">📄 Importer un devis</button>`}${p.items.length?"":` <span style="font-size:12px;color:var(--mut)">Fichier Excel (.xlsx, .xls) ou CSV · colonnes dans l’ordre : Code – Désignation – Unité – Quantité – Prix unitaire – Montant</span>`}</div>${S.msg?`<p class="${/^\d/.test(S.msg)?"":"bad"}" style="font-weight:600">${esc(S.msg)}</p>`:""}
 ${lo?`<p>🔒 Devis importé : quantités, prix et montants non modifiables.</p>`:""}
-<div class="sc"><table><tr><th class="s1">Code</th><th class="s2">Désignation</th><th>U</th><th>Quantité</th><th>P-U</th><th class="r">Montant</th>${lo?"":"<th></th>"}</tr>${pzr}${rows}<tr class="tot"><td colspan="5">Total du devis HT (DA)</td><td class="r">${fmt(r.mi)}</td>${lo?"":"<td></td>"}</tr></table></div></div>`}
+${p.items.length?`<div class="sc"><table><tr><th class="s1">Code</th><th class="s2">Désignation</th><th>U</th><th>Quantité</th><th>P-U</th><th class="r">Montant</th>${lo?"":"<th></th>"}</tr>${pzr}${rows}<tr class="tot"><td colspan="5">Total du devis HT (DA)</td><td class="r">${fmt(r.mi)}</td>${lo?"":"<td></td>"}</tr></table></div>`:""}</div>`}
 function val(){const p=P();p.val=p.val||{};p.val[p.sit]=new Date().toLocaleDateString("fr-FR");go()}
 
 /* ================================================================

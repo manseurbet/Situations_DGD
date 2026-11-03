@@ -3,10 +3,10 @@ for(let i=0;i<Math.min(rows.length,25)&&!c;i++){const r=rows[i].map(x=>String(x)
 if(d>=0&&q>=0&&pu>=0){c={k:f(x=>/^(code|n°)/.test(x)),d,u:f(x=>x=="u"||/^unit/.test(x)),q,pu,mt:f(x=>/^montant/.test(x))};s=i+1}}
 if(!c&&fx){c={k:0,d:1,u:2,q:3,pu:4,mt:5};rows=rows.map(r=>{const a=Array.from(r);while(a.length<6)a.push("");return a});for(let i=0;i<Math.min(rows.length,5);i++){const t=rows[i].map(x=>String(x).trim()).join(" ");if(/d[ée]signation|libell[ée]/i.test(t)&&!(num(rows[i][3])>0))s=i+1}}
 if(!c)return[];
-const it=[],W=[],seen={},sn=t=>t.length>40?t.slice(0,40)+"…":t,isT=t=>/(^|[\s\/])total([^a-zà-ÿ]|$)/i.test(t),glob=t=>/g[ée]n[ée]ral|t\.?t\.?c|toutes\s+taxes|^\s*t\.?v\.?a\b/i.test(t)||/^\s*total\s*(en\s*)?h\.?t\.?\s*:?\s*$/i.test(t);let lot="",pre=[],mS=0,mN=0,nu=0;
+const it=[],W=[],TL=[],seen={},TOTX=/(^|[^a-zà-ÿ])(total|montant|t\.?v\.?a|t\.?t\.?c|h\.?t|net\s+à\s+payer|toutes\s+taxes)([^a-zà-ÿ]|$)/i,sn=t=>t.length>40?t.slice(0,40)+"…":t,isT=t=>/(^|[\s\/])total([^a-zà-ÿ]|$)/i.test(t),glob=t=>/g[ée]n[ée]ral|t\.?t\.?c|toutes\s+taxes|^\s*t\.?v\.?a\b/i.test(t)||/^\s*total\s*(en\s*)?h\.?t\.?\s*:?\s*$/i.test(t);let lot="",pre=[],mS=0,mN=0,nu=0;
 rows.slice(s).forEach((r,ix)=>{const ln=s+ix+1,dd=String(r[c.d]).replace(/\s+/g," ").trim(),k=c.k>=0?String(r[c.k]).trim():"",q=num(r[c.q]),pu=num(r[c.pu]),mt=c.mt>=0?num(r[c.mt]):NaN,last=it[it.length-1];
 const sub=lb=>{if(last&&!glob(lb)){(last.sub=last.sub||[]).push(lb);const m=lb.match(/^\s*total\s*lot\s*(\d+)/i);if(m)for(let j=it.length-1;j>=0&&!it[j].lot;j--)it[j].lot="LOT "+m[1]}};
-if(!dd){const lb=String(r[c.pu]).trim(),lk=lb||k;if(isT(lk)||glob(lk)){sub(lk);return}if(!(q>0)){if(pu>0||mt>0)W.push("Ligne "+ln+" : des montants sont présents mais ni désignation ni quantité. Ligne non reprise.");return}}
+if(!dd){const lb=String(r[c.pu]).trim(),lk=lb||k;if(isT(lk)||glob(lk)){sub(lk);return}if(!(q>0)){if(pu>0||mt>0){const tx=Array.from(r).map(x=>String(x).replace(/\s+/g," ").trim()).filter(x=>x&&isNaN(num(x))).join(" ");if(tx&&TOTX.test(tx)){TL.push(ln);return}W.push("Ligne "+ln+" : des montants sont présents mais ni désignation ni quantité. Ligne non reprise.")}return}}
 if(!(q>0)){if(isT(dd)||glob(dd)){sub(dd);return}const qc=String(r[c.q]).trim();
 if(pu>0)W.push("Ligne "+ln+" « "+sn(dd)+" » : un prix est indiqué mais la quantité est "+(qc===""?"vide":"« "+qc+" »")+". Ligne reprise comme simple titre.");
 else if(qc!==""&&q!==0)W.push("Ligne "+ln+" « "+sn(dd)+" » : quantité « "+qc+" » non reconnue. Ligne reprise comme simple titre.");
@@ -19,7 +19,7 @@ it.push({n:k,pre,d:dd,u,q,pu:puv,lot,m:Array(12).fill(0),av:[0,0,0]});pre=[]});
 
 if(nu)W.push(nu+" article(s) sans unité.");
 if(fx===2&&it.length)W.unshift("Aucune ligne d’en-tête reconnue : lecture par position (Code – Désignation – Unité – Quantité – Prix unitaire – Montant). Vérifiez que cet ordre est bien celui du fichier.");
-it.w=W;it.chk=c.mt>=0&&mS>0?{mS,mN}:null;return it}
+it.w=W;it.tl=TL;it.chk=c.mt>=0&&mS>0?{mS,mN}:null;return it}
 let CAND=[],FN="",CM=false;
 function use(i){const p=P(),c=CAND[i];
 if(CM){const n=p.avn||1;p.cp=p.cp||{};p.cp[n]=c.it.map(x=>({n:x.n||"",d:x.d,u:x.u,q:x.q,pu:x.pu}));S.msg=c.it.length+" article(s) complémentaire(s) importé(s) depuis « "+c.nm+" » : total HT "+fmt(c.t)+" DA. Comparez avec votre devis complémentaire.";CAND=[];CM=false;go();return}
