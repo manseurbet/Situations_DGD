@@ -68,13 +68,13 @@ function shName(n,used){n=n.replace(/[\[\]:*?\/\\]/g," ").slice(0,31);let b=n,i=
 function exportX(id){if(!EXPORT_ON)return;const p0=S.projects.find(x=>x.id==id);if(!p0)return;
 if(typeof XLSX==="undefined"){S.bm="La bibliothèque Excel n’est pas chargée (connexion internet ?). Réessayez.";go();return}
 const sv={cur:S.cur,tab:S.tab,msg:S.msg,pz:S.pz,cand:CAND,sit:p0.sit,avn:p0.avn,sd:p0.sd};let fn="";
-try{S.cur=id;S.msg="";S.pz=false;CAND=[];const p=p0,wb=XLSX.utils.book_new(),used=new Set(),dt=new Date().toLocaleDateString("fr-FR"),note="Fichier en lecture seule – exporté d’ArchiGest DZ le "+dt+" – projet : "+p.name;
+try{S.cur=id;S.msg="";S.pz=false;CAND=[];const p=p0,wb=XLSX.utils.book_new(),used=new Set(),dt=new Date().toLocaleDateString("fr-FR"),note="Fichier en lecture seule – exporté de Situations_DGD le "+dt+" – projet : "+p.name;
 const add=(nm,pg)=>XLSX.utils.book_append_sheet(wb,mkSheet(pg,note),shName(nm,used));
 const cards=(html,keep)=>{const d=document.createElement("div");d.innerHTML=String(html).replace(/<br\s*\/?>/gi," ");return[...d.children].filter(c=>!c.matches(".np")&&c.querySelector("table"))};
 const merge=cs=>{const A=[],MG=[];cs.forEach(c=>{const g=pageRows(c),o=A.length;g.MG.forEach(m=>MG.push({s:{r:m.s.r+o,c:m.s.c},e:{r:m.e.r+o,c:m.e.c}}));g.A.forEach(r=>A.push(r))});return{A,MG}};
 const put=(names,html)=>{const cs=cards(html);if(!cs.length)return;if(cs.length===names.length)cs.forEach((c,i)=>add(names[i],pageRows(c)));else add(names[0],merge(cs))};
 // Lisez-moi
-add("Lisez-moi",{A:[["ArchiGest DZ – export du projet « "+p.name+" »"],["Date de l’export : "+dt],[],["Ce fichier est en lecture seule (protection de feuille sans mot de passe) : il sert d’archive et peut s’ouvrir dans Excel, Google Sheets ou LibreOffice."],["Il contient aussi, dans une feuille cachée, toutes les données du projet : dans ArchiGest DZ, « Ouvrir » puis « Restaurer depuis un fichier Excel » recrée le projet."],["Les modifications faites à la main dans ce fichier ne sont pas reprises par la restauration."]],MG:[]});
+add("Lisez-moi",{A:[["Situations_DGD – export du projet « "+p.name+" »"],["Date de l’export : "+dt],[],["Ce fichier est en lecture seule (protection de feuille sans mot de passe) : il sert d’archive et peut s’ouvrir dans Excel, Google Sheets ou LibreOffice."],["Il contient aussi, dans une feuille cachée, toutes les données du projet : dans Situations_DGD, « Ouvrir » puis « Restaurer depuis un fichier Excel » recrée le projet."],["Les modifications faites à la main dans ce fichier ne sont pas reprises par la restauration."]],MG:[]});
 put(["Devis"],VW.devis(p));
 const hasD=k=>(p.val&&p.val[k])||p.items.some(it=>(it.m[k-1]||0)>0)||k==sv.sit;
 for(let k=1;k<=4;k++)if(hasD(k)){p.sit=k;put(["Attachement "+k],VW.attachement(p));put(["Décompte "+k,"Récap décompte "+k],VW.decompte(p));put(["Situation "+k],VW.situation(p))}
@@ -88,7 +88,7 @@ put(["DGD","Nouveau devis"],VW.dgd(p));
 const js=JSON.stringify({v:1,app:"archigest-dz",at:new Date().toISOString(),project:p}),R=[["ARCHIGEST-DZ-V1"]];for(let i=0;i<js.length;i+=30000)R.push([js.slice(i,i+30000)]);
 XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(R),"_archigest");
 wb.Workbook={Sheets:wb.SheetNames.map(n=>({Hidden:n==="_archigest"?2:0}))};
-fn=(p.name.replace(/[\\/:*?"<>|]+/g," ").trim().slice(0,60)||"projet")+" – ArchiGest – "+new Date().toISOString().slice(0,10)+".xlsx";
+fn=(p.name.replace(/[\\/:*?"<>|]+/g," ").trim().slice(0,60)||"projet")+" – Situations_DGD – "+new Date().toISOString().slice(0,10)+".xlsx";
 const out=XLSX.write(wb,{bookType:"xlsx",type:"array"}),bl=new Blob([out],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),a=document.createElement("a");
 a.href=URL.createObjectURL(bl);a.download=fn;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);
 sv.ok=true}catch(x){sv.err=x}finally{p0.sit=sv.sit;p0.avn=sv.avn;p0.sd=sv.sd;S.cur=sv.cur;S.tab=sv.tab;S.msg=sv.msg;S.pz=sv.pz;CAND=sv.cand}
@@ -97,7 +97,7 @@ function restX(inp){const fl=inp.files[0];inp.value="";if(!fl)return;
 if(S.mode=="entreprise"&&(S.projects.length||S.entUsed)){S.bm="Profil entreprise : un seul dossier. Utilisez « Réinitialiser » pour recommencer à zéro.";go();return}
 const rd=new FileReader();rd.onload=e=>{try{if(typeof XLSX==="undefined"){S.bm="La bibliothèque Excel n’est pas chargée (connexion internet ?). Réessayez.";go();return}
 const wb=XLSX.read(e.target.result,{type:"array"}),ws=wb.Sheets["_archigest"];
-if(!ws){S.bm="Ce fichier ne contient pas de données de restauration ArchiGest DZ (il n’a pas été exporté par l’application). Pour un devis, utilisez « Importer un devis ».";go();return}
+if(!ws){S.bm="Ce fichier ne contient pas de données de restauration Situations_DGD (il n’a pas été exporté par l’application). Pour un devis, utilisez « Importer un devis ».";go();return}
 const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:""});if(!rows.length||rows[0][0]!=="ARCHIGEST-DZ-V1")throw new Error("format");
 const o=JSON.parse(rows.slice(1).map(r=>r[0]).join("")),q=o&&o.project;
 if(!q||typeof q.name!=="string"||!Array.isArray(q.items)||!q.items.every(it=>it&&typeof it.d==="string"&&isFinite(it.q)&&isFinite(it.pu)&&Array.isArray(it.m)))throw new Error("contenu");

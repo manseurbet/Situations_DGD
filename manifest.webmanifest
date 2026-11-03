@@ -1,6 +1,6 @@
 {
- "name": "ArchiGest DZ",
- "short_name": "ArchiGest",
+ "name": "Situations_DGD",
+ "short_name": "Situations_DGD",
  "description": "Suivi des situations de travaux pour cabinets d’architecture",
  "lang": "fr",
  "start_url": "./index.html",
