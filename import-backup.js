@@ -20,13 +20,15 @@ it.push({n:k,pre,d:dd,u,q,pu:puv,lot,m:Array(12).fill(0),av:[0,0,0]});pre=[]});
 if(nu)W.push(nu+" article(s) sans unité.");
 if(fx===2&&it.length)W.unshift("Aucune ligne d’en-tête reconnue : lecture par position (Code – Désignation – Unité – Quantité – Prix unitaire – Montant). Vérifiez que cet ordre est bien celui du fichier.");
 it.w=W;it.chk=c.mt>=0&&mS>0?{mS,mN}:null;return it}
-let CAND=[],FN="";
-function use(i){const p=P(),c=CAND[i];p.items=c.it.slice();p.adj={};p.sit=1;p.val={};p.lock=true;if((S.pn||"").trim())p.name=S.pn.trim();if(p.name==="Nouveau projet"&&FN)p.name=FN.replace(/\.[^.]+$/,"");S.msg=c.it.length+" articles importés depuis « "+c.nm+" » : total HT "+fmt(c.t)+" DA. Comparez avec le total de votre devis.";CAND=[];S.pt="";S.pn="";S.pz=false;S.tab="devis";go()}
+let CAND=[],FN="",CM=false;
+function use(i){const p=P(),c=CAND[i];
+if(CM){const n=p.avn||1;p.cp=p.cp||{};p.cp[n]=c.it.map(x=>({n:x.n||"",d:x.d,u:x.u,q:x.q,pu:x.pu}));S.msg=c.it.length+" article(s) complémentaire(s) importé(s) depuis « "+c.nm+" » : total HT "+fmt(c.t)+" DA. Comparez avec votre devis complémentaire.";CAND=[];CM=false;go();return}
+p.items=c.it.slice();p.adj={};p.sit=1;p.val={};p.lock=true;if((S.pn||"").trim())p.name=S.pn.trim();if(p.name==="Nouveau projet"&&FN)p.name=FN.replace(/\.[^.]+$/,"");S.msg=c.it.length+" articles importés depuis « "+c.nm+" » : total HT "+fmt(c.t)+" DA. Comparez avec le total de votre devis.";CAND=[];S.pt="";S.pn="";S.pz=false;S.tab="devis";go()}
 function cands(l){CAND=l.filter(x=>x.it.length).map(x=>Object.assign(x,{t:x.it.reduce((a,y)=>a+y.q*y.pu,0)}));
 if(!CAND.length){S.msg="Aucun article reconnu : vérifiez que les colonnes sont dans l’ordre Code, Désignation, Unité, Quantité, Prix unitaire, Montant.";go();return}
 S.msg="";go()}
-function cn(){if(CAND[0]&&CAND[0].nm=="Texte collé")S.pz=true;CAND=[];S.msg="";go()}
-function imp(inp){if(!IMPORT_FILE_ON){inp.value="";return}const fl=inp.files[0];if(!fl)return;const p=P();if(Object.keys(p.val||{}).length){S.msg="Devis verrouillé : des attachements sont déjà validés.";go();return}
+function cn(){CM=false;if(CAND[0]&&CAND[0].nm=="Texte collé")S.pz=true;CAND=[];S.msg="";go()}
+function imp(inp,cm){if(!IMPORT_FILE_ON){inp.value="";return}const fl=inp.files[0];if(!fl)return;const p=P();CM=!!cm;if(!cm&&Object.keys(p.val||{}).length){S.msg="Devis verrouillé : des attachements sont déjà validés.";go();return}
 const rd=new FileReader();FN=fl.name;
 rd.onload=e=>{try{if(typeof XLSX==="undefined"){S.msg="La bibliothèque de lecture Excel n’est pas chargée (connexion internet ?). Vérifiez votre connexion puis réessayez.";go();return}const wb=XLSX.read(e.target.result,{type:"array"});
 const sh=wb.SheetNames.filter(n=>!/infrastructure/i.test(n)).map(nm=>({nm,rw:XLSX.utils.sheet_to_json(wb.Sheets[nm],{header:1,defval:""})}));let l=sh.map(x=>({nm:x.nm,it:parseSheet(x.rw)}));if(!l.some(x=>x.it.length))l=sh.map(x=>({nm:x.nm,it:parseSheet(x.rw,2)}));cands(l)}catch(x){S.msg="Fichier illisible. Utilisez un fichier Excel ou CSV.";go()}};
@@ -65,7 +67,7 @@ ws["!cols"]=w;ws["!protect"]={};return ws}
 function shName(n,used){n=n.replace(/[\[\]:*?\/\\]/g," ").slice(0,31);let b=n,i=2;while(used.has(n.toLowerCase())){n=b.slice(0,28)+" "+i++}used.add(n.toLowerCase());return n}
 function exportX(id){if(!EXPORT_ON)return;const p0=S.projects.find(x=>x.id==id);if(!p0)return;
 if(typeof XLSX==="undefined"){S.bm="La bibliothèque Excel n’est pas chargée (connexion internet ?). Réessayez.";go();return}
-const sv={cur:S.cur,tab:S.tab,msg:S.msg,pz:S.pz,cand:CAND,sit:p0.sit,avn:p0.avn};let fn="";
+const sv={cur:S.cur,tab:S.tab,msg:S.msg,pz:S.pz,cand:CAND,sit:p0.sit,avn:p0.avn,sd:p0.sd};let fn="";
 try{S.cur=id;S.msg="";S.pz=false;CAND=[];const p=p0,wb=XLSX.utils.book_new(),used=new Set(),dt=new Date().toLocaleDateString("fr-FR"),note="Fichier en lecture seule – exporté d’ArchiGest DZ le "+dt+" – projet : "+p.name;
 const add=(nm,pg)=>XLSX.utils.book_append_sheet(wb,mkSheet(pg,note),shName(nm,used));
 const cards=(html,keep)=>{const d=document.createElement("div");d.innerHTML=String(html).replace(/<br\s*\/?>/gi," ");return[...d.children].filter(c=>!c.matches(".np")&&c.querySelector("table"))};
@@ -75,12 +77,13 @@ const put=(names,html)=>{const cs=cards(html);if(!cs.length)return;if(cs.length=
 add("Lisez-moi",{A:[["ArchiGest DZ – export du projet « "+p.name+" »"],["Date de l’export : "+dt],[],["Ce fichier est en lecture seule (protection de feuille sans mot de passe) : il sert d’archive et peut s’ouvrir dans Excel, Google Sheets ou LibreOffice."],["Il contient aussi, dans une feuille cachée, toutes les données du projet : dans ArchiGest DZ, « Ouvrir » puis « Restaurer depuis un fichier Excel » recrée le projet."],["Les modifications faites à la main dans ce fichier ne sont pas reprises par la restauration."]],MG:[]});
 put(["Devis"],VW.devis(p));
 const hasD=k=>(p.val&&p.val[k])||p.items.some(it=>(it.m[k-1]||0)>0)||k==sv.sit;
-for(let k=1;k<=12;k++)if(hasD(k)){p.sit=k;put(["Attachement "+k],VW.attachement(p));put(["Décompte "+k,"Récap décompte "+k],VW.decompte(p));put(["Situation "+k],VW.situation(p))}
+for(let k=1;k<=4;k++)if(hasD(k)){p.sit=k;put(["Attachement "+k],VW.attachement(p));put(["Décompte "+k,"Récap décompte "+k],VW.decompte(p));put(["Situation "+k],VW.situation(p))}
 p.sit=sv.sit;
-const av=new Set([sv.avn||1]);p.items.forEach(it=>(it.av||[]).forEach((x,j)=>{if(x)av.add(j+1)}));
-[...av].sort((a,b)=>a-b).forEach(n=>{p.avn=n;put(["Avenant "+n+" - Supplémentaires","Avenant "+n+" - Diminution","Avenant "+n+" - Récapitulatif"],VW.avenants(p))});
+if(p.items.some(it=>it.m.some(x=>x>0))){p.sd=true;put(["Situation définitive"],VW.situation(p));p.sd=sv.sd}
+const av=new Set([sv.avn||1]);Object.keys(p.cp||{}).forEach(k=>{if(p.cp[k].length)av.add(+k)});p.items.forEach(it=>(it.av||[]).forEach((x,j)=>{if(x)av.add(j+1)}));
+[...av].sort((a,b)=>a-b).forEach(n=>{p.avn=n;put(["Avenant "+n+" - Supplémentaires","Avenant "+n+" - Diminution","Avenant "+n+" - Complémentaires","Avenant "+n+" - Récapitulatif"],VW.avenants(p))});
 p.avn=sv.avn;
-put(["DGD"],VW.dgd(p));
+put(["DGD","Nouveau devis"],VW.dgd(p));
 // données de restauration (feuille très cachée)
 const js=JSON.stringify({v:1,app:"archigest-dz",at:new Date().toISOString(),project:p}),R=[["ARCHIGEST-DZ-V1"]];for(let i=0;i<js.length;i+=30000)R.push([js.slice(i,i+30000)]);
 XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(R),"_archigest");
@@ -88,7 +91,7 @@ wb.Workbook={Sheets:wb.SheetNames.map(n=>({Hidden:n==="_archigest"?2:0}))};
 fn=(p.name.replace(/[\\/:*?"<>|]+/g," ").trim().slice(0,60)||"projet")+" – ArchiGest – "+new Date().toISOString().slice(0,10)+".xlsx";
 const out=XLSX.write(wb,{bookType:"xlsx",type:"array"}),bl=new Blob([out],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),a=document.createElement("a");
 a.href=URL.createObjectURL(bl);a.download=fn;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);
-sv.ok=true}catch(x){sv.err=x}finally{p0.sit=sv.sit;p0.avn=sv.avn;S.cur=sv.cur;S.tab=sv.tab;S.msg=sv.msg;S.pz=sv.pz;CAND=sv.cand}
+sv.ok=true}catch(x){sv.err=x}finally{p0.sit=sv.sit;p0.avn=sv.avn;p0.sd=sv.sd;S.cur=sv.cur;S.tab=sv.tab;S.msg=sv.msg;S.pz=sv.pz;CAND=sv.cand}
 S.bm=sv.ok?"✅ Fichier « "+fn+" » créé (lecture seule). Conservez-le : il permet aussi de restaurer le projet.":"L’export a échoué : "+(sv.err&&sv.err.message||"erreur inconnue")+". Rien n’a été modifié dans vos données.";go()}
 function restX(inp){const fl=inp.files[0];inp.value="";if(!fl)return;
 if(S.mode=="entreprise"&&(S.projects.length||S.entUsed)){S.bm="Profil entreprise : un seul dossier. Utilisez « Réinitialiser » pour recommencer à zéro.";go();return}
