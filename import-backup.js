@@ -159,7 +159,7 @@ const fail=x=>{S.bm="L’export a échoué : "+(x&&x.message||"erreur inconnue")
 if(!files){fail(sv.err);return}
 zipX(files).then(bl=>{const a=document.createElement("a");a.href=URL.createObjectURL(bl);a.download=fn;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);
 S.bm="✅ Fichier « "+fn+" » créé (lecture seule). Conservez-le : il permet aussi de restaurer le projet.";go()}).catch(fail)}
-function restX(inp){const fl=inp.files[0];inp.value="";if(!fl)return;
+function restX(inp){const fl=inp.files[0];inp.value="";if(!fl)return;if(!licGate())return;
 if(S.mode=="entreprise"&&(S.projects.length||S.entUsed)){S.bm="Profil entreprise : un seul dossier. Utilisez « Réinitialiser » pour recommencer à zéro.";go();return}
 const rd=new FileReader();rd.onload=e=>{try{if(typeof XLSX==="undefined"){S.bm="La bibliothèque Excel n’est pas chargée (connexion internet ?). Réessayez.";go();return}
 const wb=XLSX.read(e.target.result,{type:"array"}),ws=wb.Sheets["_archigest"];

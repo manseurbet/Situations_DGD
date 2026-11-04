@@ -10,7 +10,7 @@ const dsc=()=>{const dl=[...new Set(S.projects.map(x=>x.grp).filter(Boolean))].f
    ================================================================ */
 const PJ=p=>p.grp&&S.mode!="entreprise"?`<div>PROJET : ${esc(p.grp)}</div><div>DEVIS : ${esc(p.name)}</div>`:`<div>PROJET : ${esc(p.name)}</div>`;
 function mg(){if(S.mode=="entreprise"||!S.mode)return;const used=new Set(S.projects.map(x=>x.grp).filter(Boolean));S.projects.forEach(x=>{if(x.grp)return;let g=x.name||"Projet",c=g,n=1;while(used.has(c))c=g+" ("+(++n)+")";x.grp=c;used.add(c)})}
-function npj(){mg();const used=new Set(S.projects.map(x=>x.grp));let g="Nouveau projet",n=1;while(used.has(g))g="Nouveau projet "+(++n);const p=mk("Devis 1");p.id=Date.now()+Math.floor(Math.random()*1000);p.grp=g;S.projects.push(p);S.lg=g;S.lk=null;S.del=null;S.dg=null;S.bm="";go("ouvrir")}
+function npj(){if(!licGate())return;mg();const used=new Set(S.projects.map(x=>x.grp));let g="Nouveau projet",n=1;while(used.has(g))g="Nouveau projet "+(++n);const p=mk("Devis 1");p.id=Date.now()+Math.floor(Math.random()*1000);p.grp=g;S.projects.push(p);S.lg=g;S.lk=null;S.del=null;S.dg=null;S.bm="";go("ouvrir")}
 function lgt(g){S.lg=S.lg===g?null:g;go()}
 function rpj(g,v){v=(v||"").trim();if(v&&v!==g){if(S.projects.some(x=>x.grp===v))S.bm="Un projet porte déjà ce nom.";else{S.projects.forEach(x=>{if(x.grp===g)x.grp=v});S.bm=""}}S.lg=null;go()}
 function dpj(g){if(S.dg===g){S.projects=S.projects.filter(x=>x.grp!==g);if(S.cur&&!S.projects.some(x=>x.id==S.cur))S.cur=null;S.dg=null;S.lg=null}else S.dg=g;go()}
@@ -29,7 +29,7 @@ function opn(id){S.cur=id;S.del=null;go(P().items.length?"attachement":"devis")}
 function dq(id){if(S.del==id){if(S.mode=="entreprise"){const q=S.projects.find(x=>x.id==id),f=mk(q.name);["ent","adr","rc","nif","nis","art","rib","bq","tva"].forEach(k=>f[k]=q[k]);f.id=q.id;S.projects[S.projects.indexOf(q)]=f;S.del=null;S.bm="✅ Projet réinitialisé : le devis et les attachements sont effacés, les informations de l’entreprise sont conservées."}else{S.projects=S.projects.filter(x=>x.id!=id);S.del=null;if(S.cur==id)S.cur=null}}else S.del=id;go()}
 function svw(v){S.vw=v;go()}
 function opd(g){const q=S.projects.find(x=>x.grp===g);if(q){S.cur=q.id;go("recapg")}}
-function ndd(g){const r=S.projects.find(x=>x.grp===g),p=mk("Nouveau devis");p.id=Date.now()+Math.floor(Math.random()*1000);p.grp=g;if(r)["moa","ent","gar","contrat","objet","doit","adr","rc","nif","nis","art","rib","bq","tva","ret"].forEach(k=>p[k]=r[k]);S.projects.push(p);S.cur=p.id;S.tab="devis";S.del=null;go()}
+function ndd(g){if(!licGate())return;const r=S.projects.find(x=>x.grp===g),p=mk("Nouveau devis");p.id=Date.now()+Math.floor(Math.random()*1000);p.grp=g;if(r)["moa","ent","gar","contrat","objet","doit","adr","rc","nif","nis","art","rib","bq","tva","ret"].forEach(k=>p[k]=r[k]);S.projects.push(p);S.cur=p.id;S.tab="devis";S.del=null;go()}
 
 /* ================================================================
    PAGE OUVRIR — liste des projets et de leurs devis
@@ -287,12 +287,16 @@ $("#v").innerHTML=(S.tab=="ouvrir"?vOuvrir():S.tab=="projets"||!p?vProj():VW[S.t
 const CPY=`<div class="np" style="text-align:center;font-size:11px;color:var(--mut);margin:8px 0 14px">© 2026 Manseur BET · Situations_DGD · Tous droits réservés</div>`;
 let LA=false,LM="",LN="",LC="";
 const licDt=ms=>new Date(ms).toLocaleDateString("fr-FR");
-function licCard(){const s=licSt();let h;
+function licCard(){const s=licSt(),wa="https://wa.me/213556751401?text="+encodeURIComponent("Bonjour, je souhaite recevoir un code d’essai gratuit (30 jours) pour l’application Situations_DGD.\nNom / cabinet : ");let h;
 if(s.k=="actif")h=`✅ <b>Licence active</b> – ${esc(s.name)} · ${s.exp?"valable jusqu’au "+licDt(s.exp):"sans limite de durée"}`;
-else if(s.k=="essai")h=`🕒 <b>Version d’essai</b> : ${s.left} jour${s.left>1?"s":""} restant${s.left>1?"s":""}. Ensuite, l’impression et l’export Excel porteront le filigrane « VERSION D’ESSAI » jusqu’à l’activation.`;
-else h=`⚠️ <b>${s.k=="exp"?"Licence expirée":"Essai terminé"}</b> : l’impression et l’export Excel portent le filigrane « VERSION D’ESSAI ». Contactez-nous pour obtenir un code d’activation.`;
-const form=LA&&s.k!="actif"?`<div style="margin-top:8px;display:flex;flex-direction:column;gap:6px;text-align:left"><input id="ln" placeholder="Nom du titulaire (tel que communiqué)" value="${esc(LN)}"><input id="lc" placeholder="Code d’activation (XXX-XXXX-XXXX)" value="${esc(LC)}" autocapitalize="characters" autocomplete="off"><button class="pri" onclick="licAct()">Activer</button>${LM?`<span style="color:var(--bad);font-size:12px">${esc(LM)}</span>`:""}</div>`:"";
-return`<div class="card np" style="font-size:13px;text-align:center">${h}${s.k=="actif"?"":`<div style="margin-top:8px"><button onclick="licTg()">🔑 J’ai un code d’activation</button></div>`}${form}</div>`}
+else if(s.k=="essai")h=`🕒 <b>Version d’essai</b> : ${s.left} jour${s.left>1?"s":""} restant${s.left>1?"s":""}. Ensuite, la création de projets sera bloquée et l’impression comme l’export Excel porteront le filigrane « VERSION D’ESSAI » jusqu’à l’activation.`;
+else if(s.k=="none")h=`🔒 <b>Essai gratuit de 30 jours sur demande</b> : pour créer un projet, demandez votre code d’essai. Il vous est envoyé rapidement par WhatsApp.`;
+else h=`⚠️ <b>${s.k=="exp"?"Licence expirée":"Essai terminé"}</b> : la création de projets est bloquée et l’impression comme l’export Excel portent le filigrane « VERSION D’ESSAI ». Demandez un nouveau code pour continuer.`;
+const form=LA&&s.k!="actif"?`<div style="margin-top:8px;display:flex;flex-direction:column;gap:6px;text-align:left"><input id="ln" placeholder="Nom du titulaire (tel que communiqué)" value="${esc(LN)}"><input id="lc" placeholder="Code (XXX-XXXX-XXXX)" value="${esc(LC)}" autocapitalize="characters" autocomplete="off"><button class="pri" onclick="licAct()">Activer</button>${LM?`<span style="color:var(--bad);font-size:12px">${esc(LM)}</span>`:""}</div>`:"";
+const btns=s.k=="actif"?"":`<div class="row" style="justify-content:center;margin-top:8px">${s.k=="essai"?"":`<a class="btn" href="${wa}" target="_blank" rel="noopener" style="text-decoration:none;background:var(--ac);color:#fff;border-color:var(--ac);font-weight:600">💬 Demander mon code d’essai</a>`}<button onclick="licTg()">🔑 J’ai un code</button></div>`;
+return`<div class="card np" id="lic" style="font-size:13px;text-align:center">${h}${btns}${form}</div>`}
+/* barrière : refuse la création d’un projet, d’un devis ou la restauration tant qu’aucune licence n’est active */
+function licGate(){if(licSt().k=="actif")return true;LA=true;LM="";S.tab="projets";go();setTimeout(()=>{const e=document.getElementById("lic");if(e)e.scrollIntoView({block:"center"})},60);return false}
 function licTg(){LA=!LA;LM="";go()}
 function licAct(){LN=$("#ln").value;LC=$("#lc").value;const v=licCheck(LN,LC);
 if(!v){LM="Nom ou code incorrect. Saisissez le nom exactement comme il vous a été communiqué.";go();return}
