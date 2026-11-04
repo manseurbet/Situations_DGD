@@ -1,3 +1,4 @@
+/* © 2026 Manseur BET – Situations_DGD – Tous droits réservés. Toute reproduction, copie ou diffusion sans autorisation écrite est interdite. */
 const $=s=>document.querySelector(s);
 /* ================================================================
    PRÉCISION — JAMAIS D'ARRONDI : on coupe (troncature), même règle partout
@@ -59,3 +60,21 @@ const okTo=(p,m)=>{for(let k=1;k<m;k++)if(!(p.val&&p.val[k]))return false;return
 const selS=p=>`<div class="card row np"><label style="width:150px">Situation n°<select onchange="gs(+this.value)">${[...Array(4)].map((_,i)=>`<option value="${i+1}" ${i+1==p.sit?"selected":""} ${okTo(p,i+1)?"":"disabled"}>${i+1}${p.val&&p.val[i+1]?" ✓":""}</option>`).join("")}</select></label>${S.sm?`<span class="bad">${esc(S.sm)}</span>`:""}</div>`;
 function gs(v){const p=P();if(!okTo(p,v)){let k=1;while(p.val&&p.val[k])k++;S.sm="Validez d’abord l’attachement n° "+k+" pour passer au suivant.";go();return}S.sm="";p.sit=v;p.sd=false;go()}
 function nx(){const p=P();if(p.sit<4&&p.val&&p.val[p.sit]){p.sit++;S.sm=""}go()}
+
+/* ===== Licence : essai complet de 30 jours, puis filigrane « VERSION D’ESSAI » à l’impression et dans l’export Excel, jusqu’à l’activation par code ===== */
+const LIC_SECRET="89737dff280f36580736",LIC_DAY=864e5,LIC_D0=Date.UTC(2024,0,1),LIC_TRIAL=30;
+const h53=s=>{let a=0xdeadbeef,b=0x41c6ce57;for(let i=0,c;i<s.length;i++){c=s.charCodeAt(i);a=Math.imul(a^c,2654435761);b=Math.imul(b^c,1597334677)}a=Math.imul(a^(a>>>16),2246822507)^Math.imul(b^(b>>>13),3266489909);b=Math.imul(b^(b>>>16),2246822507)^Math.imul(a^(a>>>13),3266489909);return 4294967296*(2097151&b)+(a>>>0)};
+const licNorm=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/\s+/g," ").trim();
+const licHash=(n,e)=>h53(LIC_SECRET+"|"+licNorm(n)+"|"+e).toString(36).toUpperCase().padStart(11,"0").slice(0,8);
+const licCode=(n,days)=>{const e=days.toString(36).toUpperCase().padStart(3,"0"),c=e+licHash(n,e);return c.slice(0,3)+"-"+c.slice(3,7)+"-"+c.slice(7)};
+const licCheck=(n,code)=>{const c=String(code||"").toUpperCase().replace(/[^A-Z0-9]/g,"");if(c.length!=11||!licNorm(n))return null;const e=c.slice(0,3);if(licHash(n,e)!==c.slice(3))return null;const d=parseInt(e,36);return{exp:d?LIC_D0+d*LIC_DAY:0}};
+
+let LIC=null;try{LIC=JSON.parse(localStorage.getItem("sdgd_lic"))}catch(e){}
+if(!LIC||!LIC.t0)LIC={t0:Date.now()};
+const licSave=()=>{try{localStorage.setItem("sdgd_lic",JSON.stringify(LIC))}catch(e){}};licSave();
+/* état de la licence : actif (code valide) · essai (jours restants) · fin (essai terminé) · exp (code expiré) ; wm = filigrane à appliquer. Un retour en arrière de l’horloge du téléphone n’allonge pas l’essai. */
+function licSt(){const t=Date.now(),now=Math.max(t,LIC.ls||0);if(now-(LIC.ls||0)>36e5){LIC.ls=now;licSave()}
+const v=LIC.code&&licCheck(LIC.name,LIC.code);
+if(v)return(!v.exp||now<v.exp+LIC_DAY)?{k:"actif",name:LIC.name,exp:v.exp,wm:false}:{k:"exp",name:LIC.name,exp:v.exp,wm:true};
+const left=LIC_TRIAL-Math.floor((now-LIC.t0)/LIC_DAY);return left>0?{k:"essai",left,wm:false}:{k:"fin",wm:true}}
+(()=>{const st=document.createElement("style");st.textContent='@media print{body.wm::before{content:"VERSION D’ESSAI";position:fixed;top:38%;left:0;right:0;text-align:center;font-size:60px;font-weight:800;letter-spacing:2px;color:rgba(190,0,0,.16);transform:rotate(-28deg);z-index:9999;pointer-events:none;white-space:nowrap}}';document.head.appendChild(st)})();
