@@ -51,7 +51,7 @@ Object.assign(it,{pr,cu,mo:t(cu-pr),tot,rawp:sum(n-1),raw:sum(n),mr:it.m[n-1]||0
 r.mi+=Mt(it,it.q);r.mm+=Mq(it);r.avm+=ta(Mq(it)-Mt(it,it.q));r.mk+=Mt(it,it.qa);r.prev+=Mp(it);r.mois+=Mm(it);r.cum+=Mc(it);r.real+=Mt(it,Math.min(tot,it.qa));r.pv+=ta(Mt(it,it.qm+pl)-Mq(it));r.mv+=mn?ta(Mq(it)-Mt(it,it.qm-mn)):0});
 Object.keys(r).forEach(k=>r[k]=ta(r[k]));
 return r}
-const fp=x=>ta(x)===0?"0":fmt(x);
+const fp=x=>fmt(x);
 const idBlock=p=>{const g=(l,v)=>v?`<div>${l} ${esc(v)}</div>`:"";return`<div style="font-size:12px;line-height:1.5"><div style="text-align:center;font-weight:700">République Algérienne Démocratique et Populaire</div>${g("",p.ent)}${g("Adresse :",p.adr)}${g("RC :",p.rc)}${g("NIF :",p.nif)}${g("NIS :",p.nis)}${g("N° d’article :",p.art)}${g("N° de compte :",(p.rib||"")+(p.bq?" · "+p.bq:""))}${g("Contrat n°",p.contrat)}${g("Objet :",p.objet)}${p.montant?g("Montant du contrat :",fmt(p.montant)+" DA"):""}${g("Doit à :",p.doit)}${g("Projet :",p.name)}</div>`};
 function sv(i,k,v){P().items[i].av[k]=v;go()}
 const L=(l,v,c)=>`<tr class="${c||""}"><td>${l}</td><td class="r">${v}</td></tr>`;

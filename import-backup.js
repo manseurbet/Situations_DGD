@@ -146,9 +146,9 @@ for(let k=1;k<=4;k++)if(hasD(k)){p.sit=k;put(["Attachement "+k],VW.attachement(p
 p.sit=sv.sit;
 if(p.items.some(it=>it.m.some(x=>x>0))){p.sd=true;put(["Situation définitive"],VW.situation(p));p.sd=sv.sd}
 const av=new Set([sv.avn||1]);Object.keys(p.cp||{}).forEach(k=>{if(p.cp[k].length)av.add(+k)});p.items.forEach(it=>(it.av||[]).forEach((x,j)=>{if(x)av.add(j+1)}));
-[...av].sort((a,b)=>a-b).forEach(n=>{p.avn=n;put(["Avenant "+n+" - Supplémentaires","Avenant "+n+" - Diminution","Avenant "+n+" - Complémentaires","Avenant "+n+" - Récapitulatif"],VW.avenants(p))});
+[...av].sort((a,b)=>a-b).forEach(n=>{p.avn=n;put(["Avenant "+n+" - Supplémentaires","Avenant "+n+" - Diminution","Avenant "+n+" - Complémentaires","Avenant "+n+" - Récapitulatif","Avenant "+n+" - Nouveau devis"],VW.avenants(p))});
 p.avn=sv.avn;
-put(["DGD","Récap DGD","Nouveau devis"],VW.dgd(p));
+put(["DGD","Récap DGD"],VW.dgd(p));
 /* données de restauration (feuille très cachée) */
 const js=JSON.stringify({v:1,app:"archigest-dz",at:new Date().toISOString(),project:p}),R=[[{v:"ARCHIGEST-DZ-V1"}]];for(let i=0;i<js.length;i+=30000)R.push([{v:js.slice(i,i+30000)}]);
 sh.push({nm:"_archigest",hid:1,m:{A:R,MG:[],BR:[],W:[20],H:[],land:false}});
