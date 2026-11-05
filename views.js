@@ -292,20 +292,18 @@ if(s.k=="actif")h=`✅ <b>Licence active</b> – ${esc(s.name)} · ${s.exp?"vala
 else if(s.k=="essai")h=`🕒 <b>Version d’essai</b> : ${s.left} jour${s.left>1?"s":""} restant${s.left>1?"s":""}. Ensuite, la création de projets sera bloquée et l’impression comme l’export Excel porteront le filigrane « VERSION D’ESSAI » jusqu’à l’activation.`;
 else if(s.k=="none")h=`🔒 <b>Essai gratuit de 30 jours sur demande</b> : pour créer un projet, demandez votre code d’essai. Il vous est envoyé rapidement par WhatsApp.`;
 else h=`⚠️ <b>${s.k=="exp"?"Licence expirée":"Essai terminé"}</b> : la création de projets est bloquée et l’impression comme l’export Excel portent le filigrane « VERSION D’ESSAI ». Demandez un nouveau code pour continuer.`;
-const form=LA&&s.k!="actif"?`<div style="margin-top:8px;display:flex;flex-direction:column;gap:6px;text-align:left"><textarea id="lp" rows="3" placeholder="Collez ici le message reçu par WhatsApp : l’activation est automatique" oninput="licPaste(this.value)" style="font-size:14px"></textarea><div style="text-align:center;font-size:12px;color:var(--mut)">ou saisissez le nom et le code :</div><input id="ln" placeholder="Nom du titulaire (tel que communiqué)" value="${esc(LN)}"><input id="lc" placeholder="Code (XXX-XXXX-XXXX)" value="${esc(LC)}" autocapitalize="characters" autocomplete="off"><button class="pri" onclick="licAct()">Activer</button>${LM?`<span style="color:var(--bad);font-size:12px">${esc(LM)}</span>`:""}</div>`:"";
+const form=LA&&s.k!="actif"?`<div style="margin-top:8px;display:flex;flex-direction:column;gap:6px;text-align:left"><input id="ln" placeholder="Nom du titulaire (tel que communiqué)" value="${esc(LN)}"><input id="lc" placeholder="Code (XXX-XXXX-XXXX) ou lien d’activation" value="${esc(LC)}" autocapitalize="characters" autocomplete="off"><button class="pri" onclick="licAct()">Activer</button>${LM?`<span style="color:var(--bad);font-size:12px">${esc(LM)}</span>`:""}</div>`:"";
 const btns=s.k=="actif"?"":`<div class="row" style="justify-content:center;margin-top:8px">${s.k=="essai"?"":`<a class="btn" href="${wa}" target="_blank" rel="noopener" style="text-decoration:none;background:var(--ac);color:#fff;border-color:var(--ac);font-weight:600">💬 Demander mon code d’essai</a>`}<button onclick="licTg()">🔑 J’ai un code</button></div>`;
 return`<div class="card np" id="lic" style="font-size:13px;text-align:center">${h}${btns}${form}</div>`}
 /* barrière : refuse la création d’un projet, d’un devis ou la restauration tant qu’aucune licence n’est active */
 function licGate(){if(licSt().k=="actif")return true;LA=true;LM="";S.tab="projets";go();setTimeout(()=>{const e=document.getElementById("lic");if(e)e.scrollIntoView({block:"center"})},60);return false}
 function licTg(){LA=!LA;LM="";go()}
 function licTry(n,c){const v=licCheck(n,c);if(!v)return"Nom ou code incorrect. Saisissez le nom exactement comme il vous a été communiqué.";if(v.exp&&Date.now()>v.exp+LIC_DAY)return"Ce code a expiré le "+licDt(v.exp)+".";LIC.name=String(n).trim();LIC.code=String(c).trim();licSave();return""}
-function licAct(){LN=$("#ln").value;LC=$("#lc").value;LM=licTry(LN,LC);if(!LM){LA=false;LN=LC=""}go()}
+function licAct(){LN=$("#ln").value;LC=$("#lc").value;const q=licParse(LC);if(q.n&&q.c){LN=q.n;LC=q.c}LM=licTry(LN,LC);if(!LM){LA=false;LN=LC=""}go()}
 /* lit un message WhatsApp collé en entier (lignes « Titulaire : … » et « Code : … ») ou un lien d’activation (#act=nom~code) */
 function licParse(t){t=String(t||"");let n="",c="";const m=t.match(/#act=([^\s~]+)~([A-Za-z0-9\-]+)/);
 if(m){try{n=decodeURIComponent(m[1])}catch(e){n=m[1]}c=m[2]}
 else{const a=t.match(/Titulaire\s*:\s*(.+)/i),b=t.match(/\bCode\s*:\s*([A-Za-z0-9][A-Za-z0-9\- ]{8,14}[A-Za-z0-9])/);if(a)n=a[1].trim();if(b)c=b[1].trim()}return{n,c}}
-function licPaste(t){const p=licParse(t);if(!p.n||!p.c){if(String(t).trim().length>25){LM="Message non reconnu : collez le message complet reçu, ou saisissez le nom et le code.";go()}return}
-LM=licTry(p.n,p.c);if(!LM)LA=false;go()}
 /* lien d’activation : https://…/#act=nom~code → active sans rien copier ni saisir */
 function licLien(){if(!/^#act=/.test(location.hash))return false;const p=licParse(location.hash);try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}
 S.tab="projets";if(!p.n||!p.c)LM="Lien d’activation incomplet : demandez-en un nouveau.";else LM=licTry(p.n,p.c);LA=!!LM;return true}
