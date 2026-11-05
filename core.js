@@ -67,7 +67,7 @@ const h53=s=>{let a=0xdeadbeef,b=0x41c6ce57;for(let i=0,c;i<s.length;i++){c=s.ch
 const licNorm=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/\s+/g," ").trim();
 const licHash=(n,e)=>h53(LIC_SECRET+"|"+licNorm(n)+"|"+e).toString(36).toUpperCase().padStart(11,"0").slice(0,8);
 const licCode=(n,days)=>{const e=days.toString(36).toUpperCase().padStart(3,"0"),c=e+licHash(n,e);return c.slice(0,3)+"-"+c.slice(3,7)+"-"+c.slice(7)};
-const licCheck=(n,code)=>{const c=String(code||"").toUpperCase().replace(/[^A-Z0-9]/g,"");if(c.length!=11||!licNorm(n))return null;const e=c.slice(0,3);if(licHash(n,e)!==c.slice(3))return null;const d=parseInt(e,36);return{exp:d?LIC_D0+d*LIC_DAY:0}};
+const licCheck=(n,code)=>{const c=String(code||"").toUpperCase().replace(/[^A-Z0-9]/g,"");if(c.length!=11||!licNorm(n))return null;const amb={"0":"0O",O:"0O","1":"1I",I:"1I"};let vs=[""];for(const ch of c){const o=amb[ch]||ch,nv=[];for(const v of vs)for(const x of o)nv.push(v+x);vs=nv}for(const v of vs){const e=v.slice(0,3);if(licHash(n,e)===v.slice(3)){const d=parseInt(e,36);return{exp:d?LIC_D0+d*LIC_DAY:0}}}return null}; /* tolère la confusion 0/O et 1/I à la saisie */
 
 let LIC=null;try{LIC=JSON.parse(localStorage.getItem("sdgd_lic"))}catch(e){}
 if(!LIC||!LIC.t0)LIC={t0:Date.now()};
