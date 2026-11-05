@@ -19,7 +19,8 @@ function dpj(g){if(S.dg===g){S.projects=S.projects.filter(x=>x.grp!==g);S.eg=(S.
    ACCUEIL — page principale (choix du mode, + Nouveau projet, Ouvrir)
    ================================================================ */
 function vProj(){return mg(),vProj1()}
-function vProj1(){return vProj0()+licCard()+ctc()}
+function licW(h){return(licSt().k=="actif"?h+licCard():licCard()+h)+ctc()}
+function vProj1(){return licW(vProj0())}
 function vProj0(){if(!S.mode)return`<div class="card" style="text-align:center"><div style="font-size:42px">🏗️</div><div style="margin:4px 0 12px">Vous êtes :</div><button class="pri" style="width:100%;font-size:17px;padding:14px" onclick="setMode('bureau')">🏛️ Bureau d’architecture<br><small>Plusieurs projets · abonnement mensuel</small></button><button style="width:100%;font-size:17px;padding:14px;margin-top:10px" onclick="setMode('entreprise')">👷 Entreprise de réalisation<br><small>Un seul projet · facturé par projet</small></button></div>`;return`<div class="card" style="text-align:center"><div style="font-size:42px">🏗️</div><div style="display:flex;flex-direction:column;gap:12px;margin-top:14px"><button class="pri" style="font-size:18px;padding:16px" onclick="${S.mode=='bureau'?'npj()':'np()'}">+ Nouveau projet</button><button style="font-size:18px;padding:16px" onclick="go('ouvrir')">📂 Ouvrir</button>${RSB}</div>${S.bm?`<p class="bad">${esc(S.bm)}</p>`:""}</div>${OK?"":`<div class="card bad">⚠️ Le navigateur bloque l’enregistrement : vos projets seront perdus à la fermeture.</div>`}`}
 
 /* ================================================================
@@ -35,13 +36,13 @@ function ndd(g){if(!licGate())return;const r=S.projects.find(x=>x.grp===g),p=mk(
    PAGE OUVRIR — liste des projets et de leurs devis
    ================================================================ */
 function vOuvrir(){mg();const bm=S.bm?`<p class="${/^✅/.test(S.bm)?"":"bad"}" style="font-weight:600">${esc(S.bm)}</p>`:"";
-if(!S.projects.length&&!(S.eg||[]).length)return`<div class="card">Aucun projet enregistré.${bm}<div style="margin-top:10px">${RSB}</div></div>`+licCard()+ctc();
+if(!S.projects.length&&!(S.eg||[]).length)return licW(`<div class="card">Aucun projet enregistré.${bm}<div style="margin-top:10px">${RSB}</div></div>`);
 const ent=S.mode=="entreprise",dl=[...new Set([...S.projects.map(x=>x.grp).filter(Boolean),...(S.eg||[])])];
 const rw=q=>`<div class="row" style="margin-top:8px;flex-wrap:nowrap"><button style="flex:1;text-align:left" onclick="opn(${q.id})">${ent?"📁":"📄"} ${esc(q.name)}</button>${ent?"":`<button title="Renommer le devis" onclick="lkt(${q.id})">✏️</button>`}<button ${EXPORT_ON?`title="Exporter en Excel (lecture seule)" onclick="exportX(${q.id})"`:`title="Bientôt disponible" disabled style="opacity:.45"`}>📤 Excel</button><button onclick="dq(${q.id})">${S.del==q.id?(ent?"Confirmer la réinitialisation":"Confirmer la suppression"):(ent?"↺ Réinitialiser":"🗑")}</button></div>${S.lk==q.id?`<div style="margin-top:4px"><input style="width:100%" placeholder="Nom du devis" value="${esc(q.name)}" onchange="rn(${q.id},this.value)"></div>`:""}`;
 let list;
 if(ent)list=S.projects.map(rw).join("");
 else list=dl.map(g=>{const ms=S.projects.filter(x=>x.grp===g),ga=JSON.stringify(g).replace(/"/g,"&quot;");return`<div style="margin-top:14px;padding-top:8px;border-top:1px solid var(--ln)"><div class="row" style="flex-wrap:nowrap"><b style="flex:1">📂 ${esc(g)} <small style="color:var(--mut)">(${ms.length?ms.length+" devis":"aucun devis"})</small></b><button title="Renommer le projet" onclick="lgt(${ga})">✏️</button><button onclick="dpj(${ga})">${S.dg===g?"Confirmer : supprimer le projet et ses devis":"🗑"}</button></div>${S.lg===g?`<input style="width:100%;margin-top:6px" placeholder="Nom du projet" value="${esc(ms.length||!/^Nouveau projet( \d+)?$/.test(g)?g:"")}" onchange="rpj(${ga},this.value)">`:""}${ms.length?"":`<div style="font-size:12px;color:var(--mut);margin-top:6px">Aucun devis : touchez « ➕ Devis » pour créer le premier.</div>`}${ms.map(rw).join("")}<div class="row" style="margin-top:8px"><button onclick="ndd(${ga})">➕ Devis</button>${ms.length>1?`<button onclick="opd(${ga})">📑 Récapitulatives générales</button>`:""}</div></div>`}).join("");
-return`<div class="card"><b>Projets enregistrés</b>${bm}${list}<div style="margin-top:12px">${RSB}</div></div>`+licCard()+ctc()}
+return licW(`<div class="card"><b>Projets enregistrés</b>${bm}${list}<div style="margin-top:12px">${RSB}</div></div>`)}
 
 
 /* ================================================================
@@ -276,7 +277,7 @@ return selS(p)+gnav(part)+(part=="s"?c2:c1)+`<div class="row np"><button onclick
    AFFICHAGE — table des pages (VW) et render()
    ================================================================ */
 const VW={recapa:vRecA,recaps:vRecS,recapd:vRecD,recapg:vRecG,devis:vDevis,infos:vInfos,attachement:vAtt,decompte:vDec,situation:vSit,avenants:vAv,dgd:vDgd};
-function render(){const p=P();if(!VW[S.tab]&&S.tab!="projets"&&S.tab!="ouvrir")S.tab="projets";
+function render(){const p=P();if(!VW[S.tab]&&S.tab!="projets"&&S.tab!="ouvrir")S.tab="projets";if(LT!==null&&S.tab!==LT){LA=false;LM="";LG=""}LT=S.tab;
 $("#pn").textContent=p?(p.grp&&S.mode!="entreprise"?p.grp+" › ":"")+p.name:"Gestion de cabinet d’architecture · modèle algérien";
 $("#nav").innerHTML=TABS.map(([k,i,l])=>`<button class="${S.tab==k||(k=="projets"&&(S.tab=="infos"||S.tab=="ouvrir"))?"on":""}" ${k!="projets"&&!p?"disabled":""} onclick="go('${k}')"><span>${i}</span>${l}</button>`).join("");
 $("#v").innerHTML=(S.tab=="ouvrir"?vOuvrir():S.tab=="projets"||!p?vProj():VW[S.tab](p))+CPY;document.body.classList.toggle("wm",licSt().wm)}
@@ -285,7 +286,7 @@ $("#v").innerHTML=(S.tab=="ouvrir"?vOuvrir():S.tab=="projets"||!p?vProj():VW[S.t
    LICENCE — carte d’état (essai / active), saisie du code d’activation, mention © en bas de page
    ================================================================ */
 const CPY=`<div class="np" style="text-align:center;font-size:11px;color:var(--mut);margin:8px 0 14px">© 2026 Manseur BET · Situations_DGD · Tous droits réservés</div>`;
-let LA=false,LM="",LN="",LC="";
+let LA=false,LM="",LN="",LC="",LG="",LT=null;
 const licDt=ms=>new Date(ms).toLocaleDateString("fr-FR");
 function licCard(){const s=licSt(),wa="https://wa.me/213556751401?text="+encodeURIComponent("Bonjour, je souhaite recevoir un code d’essai gratuit (30 jours) pour l’application Situations_DGD.\nNom / cabinet : ");let h;
 if(s.k=="actif")h=`✅ <b>Licence active</b> – ${esc(s.name)} · ${s.exp?"valable jusqu’au "+licDt(s.exp):"sans limite de durée"}`;
@@ -293,12 +294,13 @@ else if(s.k=="essai")h=`🕒 <b>Version d’essai</b> : ${s.left} jour${s.left>1
 else if(s.k=="none")h=`🔒 <b>Essai gratuit de 30 jours sur demande</b> : pour créer un projet, demandez votre code d’essai. Il vous est envoyé rapidement par WhatsApp.`;
 else h=`⚠️ <b>${s.k=="exp"?"Licence expirée":"Essai terminé"}</b> : la création de projets est bloquée et l’impression comme l’export Excel portent le filigrane « VERSION D’ESSAI ». Demandez un nouveau code pour continuer.`;
 const form=LA&&s.k!="actif"?`<div style="margin-top:8px;display:flex;flex-direction:column;gap:6px;text-align:left"><input id="ln" placeholder="Nom du titulaire (tel que communiqué)" value="${esc(LN)}"><input id="lc" placeholder="Code (XXX-XXXX-XXXX) ou lien d’activation" value="${esc(LC)}" autocapitalize="characters" autocomplete="off"><button class="pri" onclick="licAct()">Activer</button>${LM?`<span style="color:var(--bad);font-size:12px">${esc(LM)}</span>`:""}</div>`:"";
-const btns=s.k=="actif"?"":`<div class="row" style="justify-content:center;margin-top:8px">${s.k=="essai"?"":`<a class="btn" href="${wa}" target="_blank" rel="noopener" style="text-decoration:none;background:var(--ac);color:#fff;border-color:var(--ac);font-weight:600">💬 Demander mon code d’essai</a>`}<button onclick="licTg()">🔑 J’ai un code</button></div>`;
-return`<div class="card np" id="lic" style="font-size:13px;text-align:center">${h}${btns}${form}</div>`}
+const btns=s.k=="actif"?"":`<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">${s.k=="essai"?"":`<a class="btn" href="${wa}" target="_blank" rel="noopener" onclick="licCnt('demande-code','Demande de code d’essai')" style="display:flex;justify-content:center;width:100%;box-sizing:border-box;text-decoration:none;background:var(--ac);color:#fff;border-color:var(--ac);font-weight:700;font-size:18px;padding:16px">💬 Demander mon code d’essai</a>`}<button onclick="licTg()">🔑 J’ai un code</button></div>`;
+return`<div class="card np" id="lic" style="font-size:13px;text-align:center">${h}${LG&&s.k!="actif"?`<div style="color:var(--bad);font-weight:700;margin-top:8px">${esc(LG)}</div>`:""}${btns}${form}</div>`}
 /* barrière : refuse la création d’un projet, d’un devis ou la restauration tant qu’aucune licence n’est active */
-function licGate(){if(licSt().k=="actif")return true;LA=true;LM="";S.tab="projets";go();setTimeout(()=>{const e=document.getElementById("lic");if(e)e.scrollIntoView({block:"center"})},60);return false}
-function licTg(){LA=!LA;LM="";go()}
-function licTry(n,c){const v=licCheck(n,c);if(!v)return"Nom ou code incorrect. Saisissez le nom exactement comme il vous a été communiqué.";if(v.exp&&Date.now()>v.exp+LIC_DAY)return"Ce code a expiré le "+licDt(v.exp)+".";LIC.name=String(n).trim();LIC.code=String(c).trim();licSave();return""}
+function licGate(){if(licSt().k=="actif")return true;LA=false;LM="";LG="🔒 Pour créer un projet, il faut d’abord un code d’essai ou d’activation.";go();setTimeout(()=>{const e=document.getElementById("lic");if(e)e.scrollIntoView({block:"center"})},60);return false}
+function licCnt(p,t){try{if(window.goatcounter&&goatcounter.count)goatcounter.count({path:p,title:t,event:true})}catch(e){}}
+function licTg(){LA=!LA;LM="";LG="";go()}
+function licTry(n,c){const v=licCheck(n,c);if(!v)return"Nom ou code incorrect. Saisissez le nom exactement comme il vous a été communiqué.";if(v.exp&&Date.now()>v.exp+LIC_DAY)return"Ce code a expiré le "+licDt(v.exp)+".";LIC.name=String(n).trim();LIC.code=String(c).trim();licSave();licCnt("activation-licence","Activation de licence");LG="";return""}
 function licAct(){LN=$("#ln").value;LC=$("#lc").value;const q=licParse(LC);if(q.n&&q.c){LN=q.n;LC=q.c}LM=licTry(LN,LC);if(!LM){LA=false;LN=LC=""}go()}
 /* lit un message WhatsApp collé en entier (lignes « Titulaire : … » et « Code : … ») ou un lien d’activation (#act=nom~code) */
 function licParse(t){t=String(t||"");let n="",c="";const m=t.match(/#act=([^\s~]+)~([A-Za-z0-9\-]+)/);
