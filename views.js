@@ -9,11 +9,11 @@ const dsc=()=>{const dl=[...new Set(S.projects.map(x=>x.grp).filter(Boolean))].f
    PROJETS — créer, renommer, supprimer un projet et ses devis
    ================================================================ */
 const PJ=p=>p.grp&&S.mode!="entreprise"?`<div>PROJET : ${esc(p.grp)}</div><div>DEVIS : ${esc(p.name)}</div>`:`<div>PROJET : ${esc(p.name)}</div>`;
-function mg(){if(S.mode=="entreprise"||!S.mode)return;const used=new Set(S.projects.map(x=>x.grp).filter(Boolean));S.projects.forEach(x=>{if(x.grp)return;let g=x.name||"Projet",c=g,n=1;while(used.has(c))c=g+" ("+(++n)+")";x.grp=c;used.add(c)})}
-function npj(){if(!licGate())return;mg();const used=new Set(S.projects.map(x=>x.grp));let g="Nouveau projet",n=1;while(used.has(g))g="Nouveau projet "+(++n);const p=mk("Devis 1");p.id=Date.now()+Math.floor(Math.random()*1000);p.grp=g;S.projects.push(p);S.lg=g;S.lk=null;S.del=null;S.dg=null;S.bm="";go("ouvrir")}
+function mg(){S.eg=(S.eg||[]).filter(g=>!S.projects.some(x=>x.grp===g));if(S.mode=="entreprise"||!S.mode)return;const used=new Set(S.projects.map(x=>x.grp).filter(Boolean));S.projects.forEach(x=>{if(x.grp)return;let g=x.name||"Projet",c=g,n=1;while(used.has(c))c=g+" ("+(++n)+")";x.grp=c;used.add(c)})}
+function npj(){if(!licGate())return;mg();const used=new Set([...S.projects.map(x=>x.grp),...S.eg]);let g="Nouveau projet",n=1;while(used.has(g))g="Nouveau projet "+(++n);S.eg.push(g);S.lg=g;S.lk=null;S.del=null;S.dg=null;S.bm="";go("ouvrir");setTimeout(()=>{const e=document.querySelector('input[placeholder="Nom du projet"]');if(e)e.focus()},80)}
 function lgt(g){S.lg=S.lg===g?null:g;go()}
-function rpj(g,v){v=(v||"").trim();if(v&&v!==g){if(S.projects.some(x=>x.grp===v))S.bm="Un projet porte déjà ce nom.";else{S.projects.forEach(x=>{if(x.grp===g)x.grp=v});S.bm=""}}S.lg=null;go()}
-function dpj(g){if(S.dg===g){S.projects=S.projects.filter(x=>x.grp!==g);if(S.cur&&!S.projects.some(x=>x.id==S.cur))S.cur=null;S.dg=null;S.lg=null}else S.dg=g;go()}
+function rpj(g,v){v=(v||"").trim();if(v&&v!==g){if(S.projects.some(x=>x.grp===v)||(S.eg||[]).includes(v))S.bm="Un projet porte déjà ce nom.";else{S.projects.forEach(x=>{if(x.grp===g)x.grp=v});S.eg=(S.eg||[]).map(x=>x===g?v:x);S.bm=""}}S.lg=null;go()}
+function dpj(g){if(S.dg===g){S.projects=S.projects.filter(x=>x.grp!==g);S.eg=(S.eg||[]).filter(x=>x!==g);if(S.cur&&!S.projects.some(x=>x.id==S.cur))S.cur=null;S.dg=null;S.lg=null}else S.dg=g;go()}
 
 /* ================================================================
    ACCUEIL — page principale (choix du mode, + Nouveau projet, Ouvrir)
@@ -29,18 +29,18 @@ function opn(id){S.cur=id;S.del=null;go(P().items.length?"attachement":"devis")}
 function dq(id){if(S.del==id){if(S.mode=="entreprise"){const q=S.projects.find(x=>x.id==id),f=mk(q.name);["ent","adr","rc","nif","nis","art","rib","bq","tva"].forEach(k=>f[k]=q[k]);f.id=q.id;S.projects[S.projects.indexOf(q)]=f;S.del=null;S.bm="✅ Projet réinitialisé : le devis et les attachements sont effacés, les informations de l’entreprise sont conservées."}else{S.projects=S.projects.filter(x=>x.id!=id);S.del=null;if(S.cur==id)S.cur=null}}else S.del=id;go()}
 function svw(v){S.vw=v;go()}
 function opd(g){const q=S.projects.find(x=>x.grp===g);if(q){S.cur=q.id;go("recapg")}}
-function ndd(g){if(!licGate())return;const r=S.projects.find(x=>x.grp===g),p=mk("Nouveau devis");p.id=Date.now()+Math.floor(Math.random()*1000);p.grp=g;if(r)["moa","ent","gar","contrat","objet","doit","adr","rc","nif","nis","art","rib","bq","tva","ret"].forEach(k=>p[k]=r[k]);S.projects.push(p);S.cur=p.id;S.tab="devis";S.del=null;go()}
+function ndd(g){if(!licGate())return;const r=S.projects.find(x=>x.grp===g),p=mk(r?"Nouveau devis":"Devis 1");S.eg=(S.eg||[]).filter(x=>x!==g);p.id=Date.now()+Math.floor(Math.random()*1000);p.grp=g;if(r)["moa","ent","gar","contrat","objet","doit","adr","rc","nif","nis","art","rib","bq","tva","ret"].forEach(k=>p[k]=r[k]);S.projects.push(p);S.cur=p.id;S.tab="devis";S.del=null;go()}
 
 /* ================================================================
    PAGE OUVRIR — liste des projets et de leurs devis
    ================================================================ */
 function vOuvrir(){mg();const bm=S.bm?`<p class="${/^✅/.test(S.bm)?"":"bad"}" style="font-weight:600">${esc(S.bm)}</p>`:"";
-if(!S.projects.length)return`<div class="card">Aucun projet enregistré.${bm}<div style="margin-top:10px">${RSB}</div></div>`+licCard()+ctc();
-const ent=S.mode=="entreprise",dl=[...new Set(S.projects.map(x=>x.grp).filter(Boolean))];
+if(!S.projects.length&&!(S.eg||[]).length)return`<div class="card">Aucun projet enregistré.${bm}<div style="margin-top:10px">${RSB}</div></div>`+licCard()+ctc();
+const ent=S.mode=="entreprise",dl=[...new Set([...S.projects.map(x=>x.grp).filter(Boolean),...(S.eg||[])])];
 const rw=q=>`<div class="row" style="margin-top:8px;flex-wrap:nowrap"><button style="flex:1;text-align:left" onclick="opn(${q.id})">${ent?"📁":"📄"} ${esc(q.name)}</button>${ent?"":`<button title="Renommer le devis" onclick="lkt(${q.id})">✏️</button>`}<button ${EXPORT_ON?`title="Exporter en Excel (lecture seule)" onclick="exportX(${q.id})"`:`title="Bientôt disponible" disabled style="opacity:.45"`}>📤 Excel</button><button onclick="dq(${q.id})">${S.del==q.id?(ent?"Confirmer la réinitialisation":"Confirmer la suppression"):(ent?"↺ Réinitialiser":"🗑")}</button></div>${S.lk==q.id?`<div style="margin-top:4px"><input style="width:100%" placeholder="Nom du devis" value="${esc(q.name)}" onchange="rn(${q.id},this.value)"></div>`:""}`;
 let list;
 if(ent)list=S.projects.map(rw).join("");
-else list=dl.map(g=>{const ms=S.projects.filter(x=>x.grp===g),ga=JSON.stringify(g).replace(/"/g,"&quot;");return`<div style="margin-top:14px;padding-top:8px;border-top:1px solid var(--ln)"><div class="row" style="flex-wrap:nowrap"><b style="flex:1">📂 ${esc(g)} <small style="color:var(--mut)">(${ms.length} devis)</small></b><button title="Renommer le projet" onclick="lgt(${ga})">✏️</button><button onclick="dpj(${ga})">${S.dg===g?"Confirmer : supprimer le projet et ses devis":"🗑"}</button></div>${S.lg===g?`<input style="width:100%;margin-top:6px" placeholder="Nom du projet" value="${esc(g)}" onchange="rpj(${ga},this.value)">`:""}${ms.map(rw).join("")}<div class="row" style="margin-top:8px"><button onclick="ndd(${ga})">➕ Devis</button>${ms.length>1?`<button onclick="opd(${ga})">📑 Récapitulatives générales</button>`:""}</div></div>`}).join("");
+else list=dl.map(g=>{const ms=S.projects.filter(x=>x.grp===g),ga=JSON.stringify(g).replace(/"/g,"&quot;");return`<div style="margin-top:14px;padding-top:8px;border-top:1px solid var(--ln)"><div class="row" style="flex-wrap:nowrap"><b style="flex:1">📂 ${esc(g)} <small style="color:var(--mut)">(${ms.length?ms.length+" devis":"aucun devis"})</small></b><button title="Renommer le projet" onclick="lgt(${ga})">✏️</button><button onclick="dpj(${ga})">${S.dg===g?"Confirmer : supprimer le projet et ses devis":"🗑"}</button></div>${S.lg===g?`<input style="width:100%;margin-top:6px" placeholder="Nom du projet" value="${esc(ms.length||!/^Nouveau projet( \d+)?$/.test(g)?g:"")}" onchange="rpj(${ga},this.value)">`:""}${ms.length?"":`<div style="font-size:12px;color:var(--mut);margin-top:6px">Aucun devis : touchez « ➕ Devis » pour créer le premier.</div>`}${ms.map(rw).join("")}<div class="row" style="margin-top:8px"><button onclick="ndd(${ga})">➕ Devis</button>${ms.length>1?`<button onclick="opd(${ga})">📑 Récapitulatives générales</button>`:""}</div></div>`}).join("");
 return`<div class="card"><b>Projets enregistrés</b>${bm}${list}<div style="margin-top:12px">${RSB}</div></div>`+licCard()+ctc()}
 
 
