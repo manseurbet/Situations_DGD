@@ -10,7 +10,7 @@ const dsc=()=>{const dl=[...new Set(S.projects.map(x=>x.grp).filter(Boolean))].f
    ================================================================ */
 const PJ=p=>p.grp&&S.mode!="entreprise"?`<div>PROJET : ${esc(p.grp)}</div><div>DEVIS : ${esc(p.name)}</div>`:`<div>PROJET : ${esc(p.name)}</div>`;
 function mg(){S.eg=(S.eg||[]).filter(g=>!S.projects.some(x=>x.grp===g));if(S.mode=="entreprise"||!S.mode)return;const used=new Set(S.projects.map(x=>x.grp).filter(Boolean));S.projects.forEach(x=>{if(x.grp)return;let g=x.name||"Projet",c=g,n=1;while(used.has(c))c=g+" ("+(++n)+")";x.grp=c;used.add(c)})}
-function npj(){if(!licGate())return;mg();const used=new Set([...S.projects.map(x=>x.grp),...S.eg]);let g="Nouveau projet",n=1;while(used.has(g))g="Nouveau projet "+(++n);S.eg.push(g);S.lg=g;S.lk=null;S.del=null;S.dg=null;S.bm="";go("ouvrir");setTimeout(()=>{const e=document.querySelector('input[placeholder="Nom du projet"]');if(e)e.focus()},80)}
+function npj(){if(!licGate())return;licCnt("projet-cree","Projet créé");mg();const used=new Set([...S.projects.map(x=>x.grp),...S.eg]);let g="Nouveau projet",n=1;while(used.has(g))g="Nouveau projet "+(++n);S.eg.push(g);S.lg=g;S.lk=null;S.del=null;S.dg=null;S.bm="";go("ouvrir");setTimeout(()=>{const e=document.querySelector('input[placeholder="Nom du projet"]');if(e)e.focus()},80)}
 function lgt(g){S.lg=S.lg===g?null:g;go()}
 function rpj(g,v){v=(v||"").trim();if(v&&v!==g){if(S.projects.some(x=>x.grp===v)||(S.eg||[]).includes(v))S.bm="Un projet porte déjà ce nom.";else{S.projects.forEach(x=>{if(x.grp===g)x.grp=v});S.eg=(S.eg||[]).map(x=>x===g?v:x);S.bm=""}}S.lg=null;go()}
 function dpj(g){if(S.dg===g){S.projects=S.projects.filter(x=>x.grp!==g);S.eg=(S.eg||[]).filter(x=>x!==g);if(S.cur&&!S.projects.some(x=>x.id==S.cur))S.cur=null;S.dg=null;S.lg=null}else S.dg=g;go()}
@@ -30,7 +30,7 @@ function opn(id){S.cur=id;S.del=null;go(P().items.length?"attachement":"devis")}
 function dq(id){if(S.del==id){if(S.mode=="entreprise"){const q=S.projects.find(x=>x.id==id),f=mk(q.name);["ent","adr","rc","nif","nis","art","rib","bq","tva"].forEach(k=>f[k]=q[k]);f.id=q.id;S.projects[S.projects.indexOf(q)]=f;S.del=null;S.bm="✅ Projet réinitialisé : le devis et les attachements sont effacés, les informations de l’entreprise sont conservées."}else{S.projects=S.projects.filter(x=>x.id!=id);S.del=null;if(S.cur==id)S.cur=null}}else S.del=id;go()}
 function svw(v){S.vw=v;go()}
 function opd(g){const q=S.projects.find(x=>x.grp===g);if(q){S.cur=q.id;go("recapg")}}
-function ndd(g){if(!licGate())return;const r=S.projects.find(x=>x.grp===g),p=mk(r?"Nouveau devis":"Devis 1");S.eg=(S.eg||[]).filter(x=>x!==g);p.id=Date.now()+Math.floor(Math.random()*1000);p.grp=g;if(r)["moa","ent","gar","contrat","objet","doit","adr","rc","nif","nis","art","rib","bq","tva","ret"].forEach(k=>p[k]=r[k]);S.projects.push(p);S.cur=p.id;S.tab="devis";S.del=null;go()}
+function ndd(g){if(!licGate())return;licCnt("devis-cree","Devis créé");const r=S.projects.find(x=>x.grp===g),p=mk(r?"Nouveau devis":"Devis 1");S.eg=(S.eg||[]).filter(x=>x!==g);p.id=Date.now()+Math.floor(Math.random()*1000);p.grp=g;if(r)["moa","ent","gar","contrat","objet","doit","adr","rc","nif","nis","art","rib","bq","tva","ret"].forEach(k=>p[k]=r[k]);S.projects.push(p);S.cur=p.id;S.tab="devis";S.del=null;go()}
 
 /* ================================================================
    PAGE OUVRIR — liste des projets et de leurs devis
@@ -49,7 +49,7 @@ return licW(`<div class="card"><b>Projets enregistrés</b>${bm}${list}<div style
    ENREGISTRER / IMPRIMER — passage par le formulaire entrepreneur
    ================================================================ */
 function fin(a){const p=P();if(!p.ent&&!p.skip){S.back={tab:S.tab,act:a};go("infos");return}act(a)}
-function act(a){const p=P();if(a=="print")window.print();else{p.saved=p.saved||{};p.saved[(p.sd&&S.tab=="situation")?"D":p.sit]=new Date().toLocaleDateString("fr-FR");go()}}
+function act(a){const p=P();if(a=="print"){licCnt("impression","Impression");window.print()}else{p.saved=p.saved||{};p.saved[(p.sd&&S.tab=="situation")?"D":p.sit]=new Date().toLocaleDateString("fr-FR");go()}}
 function cont(){const b=S.back;S.back=null;if(b){S.tab=b.tab;go();act(b.act)}else go(S.prev&&S.prev!="infos"?S.prev:"projets")}
 function p0(){P().skip=true;cont()}
 
@@ -298,7 +298,9 @@ const btns=s.k=="actif"?"":`<div style="display:flex;flex-direction:column;gap:8
 return`<div class="card np" id="lic" style="font-size:13px;text-align:center">${h}${LG&&s.k!="actif"?`<div style="color:var(--bad);font-weight:700;margin-top:8px">${esc(LG)}</div>`:""}${btns}${form}</div>`}
 /* barrière : refuse la création d’un projet, d’un devis ou la restauration tant qu’aucune licence n’est active */
 function licGate(){if(licSt().k=="actif")return true;LA=false;LM="";LG="🔒 Pour créer un projet, il faut d’abord un code d’essai ou d’activation.";go();setTimeout(()=>{const e=document.getElementById("lic");if(e)e.scrollIntoView({block:"center"})},60);return false}
-function licCnt(p,t){try{if(window.goatcounter&&goatcounter.count)goatcounter.count({path:p,title:t,event:true})}catch(e){}}
+/* événement GoatCounter : si le compteur n'est pas encore chargé (activation par lien dès l'ouverture), on réessaie pendant quelques secondes */
+function licCnt(p,t){const go1=()=>{try{goatcounter.count({path:p,title:t,event:true})}catch(e){}};
+if(window.goatcounter&&goatcounter.count){go1();return}let n=0;const iv=setInterval(()=>{if(window.goatcounter&&goatcounter.count){clearInterval(iv);go1()}else if(++n>40)clearInterval(iv)},250)}
 function licTg(){LA=!LA;LM="";LG="";go()}
 function licTry(n,c){const v=licCheck(n,c);if(!v)return"Nom ou code incorrect. Saisissez le nom exactement comme il vous a été communiqué.";if(v.exp&&Date.now()>v.exp+LIC_DAY)return"Ce code a expiré le "+licDt(v.exp)+".";LIC.name=String(n).trim();LIC.code=String(c).trim();licSave();licCnt("activation-licence","Activation de licence");LG="";return""}
 function licAct(){LN=$("#ln").value;LC=$("#lc").value;const q=licParse(LC);if(q.n&&q.c){LN=q.n;LC=q.c}LM=licTry(LN,LC);if(!LM){LA=false;LN=LC=""}go()}

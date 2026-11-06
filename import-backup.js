@@ -22,7 +22,7 @@ if(nu)W.push(nu+" article(s) sans unité.");
 if(fx===2&&it.length)W.unshift("Aucune ligne d’en-tête reconnue : lecture par position (Code – Désignation – Unité – Quantité – Prix unitaire – Montant). Vérifiez que cet ordre est bien celui du fichier.");
 it.w=W;it.tl=TL;it.chk=c.mt>=0&&mS>0?{mS,mN}:null;return it}
 let CAND=[],FN="",CM=false;
-function use(i){const p=P(),c=CAND[i];
+function use(i){licCnt("devis-importe","Devis importé");const p=P(),c=CAND[i];
 if(CM){const n=p.avn||1;p.cp=p.cp||{};p.cp[n]=c.it.map(x=>({n:x.n||"",d:x.d,u:x.u,q:x.q,pu:x.pu}));S.msg=c.it.length+" article(s) complémentaire(s) importé(s) depuis « "+c.nm+" » : total HT "+fmt(c.t)+" DA. Comparez avec votre devis complémentaire.";CAND=[];CM=false;go();return}
 p.items=c.it.slice();p.adj={};p.sit=1;p.val={};p.lock=true;if((S.pn||"").trim())p.name=S.pn.trim();if(p.name==="Nouveau projet"&&FN)p.name=FN.replace(/\.[^.]+$/,"");S.msg=c.it.length+" articles importés depuis « "+c.nm+" » : total HT "+fmt(c.t)+" DA. Comparez avec le total de votre devis.";CAND=[];S.pt="";S.pn="";S.pz=false;S.tab="devis";go()}
 function cands(l){CAND=l.filter(x=>x.it.length).map(x=>Object.assign(x,{t:x.it.reduce((a,y)=>a+y.q*y.pu,0)}));
@@ -158,7 +158,7 @@ files=buildXlsx(sh)}catch(x){sv.err=x}finally{p0.sit=sv.sit;p0.avn=sv.avn;p0.sd=
 const fail=x=>{S.bm="L’export a échoué : "+(x&&x.message||"erreur inconnue")+". Rien n’a été modifié dans vos données.";go()};
 if(!files){fail(sv.err);return}
 zipX(files).then(bl=>{const a=document.createElement("a");a.href=URL.createObjectURL(bl);a.download=fn;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);
-S.bm="✅ Fichier « "+fn+" » créé (lecture seule). Conservez-le : il permet aussi de restaurer le projet.";go()}).catch(fail)}
+licCnt("export-excel","Export Excel");S.bm="✅ Fichier « "+fn+" » créé (lecture seule). Conservez-le : il permet aussi de restaurer le projet.";go()}).catch(fail)}
 function restX(inp){const fl=inp.files[0];inp.value="";if(!fl)return;if(!licGate())return;
 if(S.mode=="entreprise"&&(S.projects.length||S.entUsed)){S.bm="Profil entreprise : un seul dossier. Utilisez « Réinitialiser » pour recommencer à zéro.";go();return}
 const rd=new FileReader();rd.onload=e=>{try{if(typeof XLSX==="undefined"){S.bm="La bibliothèque Excel n’est pas chargée (connexion internet ?). Réessayez.";go();return}
