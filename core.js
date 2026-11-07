@@ -57,7 +57,7 @@ const idBlock=p=>{const g=(l,v)=>v?`<div>${l} ${esc(v)}</div>`:"";return`<div st
 function sv(i,k,v){P().items[i].av[k]=v;go()}
 const L=(l,v,c)=>`<tr class="${c||""}"><td>${l}</td><td class="r">${v}</td></tr>`;
 const okTo=(p,m)=>{for(let k=1;k<m;k++)if(!(p.val&&p.val[k]))return false;return true};
-const selS=p=>`<div class="card row np"><label style="width:150px">Situation n°<select onchange="gs(+this.value)">${[...Array(4)].map((_,i)=>`<option value="${i+1}" ${i+1==p.sit?"selected":""} ${okTo(p,i+1)?"":"disabled"}>${i+1}${p.val&&p.val[i+1]?" ✓":""}</option>`).join("")}</select></label>${S.sm?`<span class="bad">${esc(S.sm)}</span>`:""}</div>`;
+const selS=(p,lb)=>`<div class="card row np"><label style="width:150px">${lb||"Situation"} n°<select onchange="gs(+this.value)">${[...Array(4)].map((_,i)=>`<option value="${i+1}" ${i+1==p.sit?"selected":""} ${okTo(p,i+1)?"":"disabled"}>${i+1}${p.val&&p.val[i+1]?" ✓":""}</option>`).join("")}</select></label>${S.sm?`<span class="bad">${esc(S.sm)}</span>`:""}</div>`;
 function gs(v){const p=P();if(!okTo(p,v)){let k=1;while(p.val&&p.val[k])k++;S.sm="Validez d’abord l’attachement n° "+k+" pour passer au suivant.";go();return}S.sm="";p.sit=v;p.sd=false;go()}
 function nx(){const p=P();if(p.sit<4&&p.val&&p.val[p.sit]){p.sit++;S.sm=""}go()}
 

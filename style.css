@@ -43,8 +43,8 @@ input[type=number]{-moz-appearance:textfield}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 @media (max-width:700px){.dz{width:112px;max-width:112px;font-size:12px}th,td{padding:3px 4px;font-size:12px}td input{min-width:56px}}
 @media (max-width:420px){nav button{font-size:9px;letter-spacing:-.3px}nav button span{font-size:18px}}
-@page{size:A4 portrait;margin:10mm}
-@page land{size:A4 landscape;margin:8mm}
+@page{size:A4 portrait;margin:10mm 10mm 24mm;@bottom-left{content:"Maître d’ouvrage";vertical-align:top;padding-top:4mm;font:bold 11px Arial,sans-serif;color:#000}@bottom-center{content:"Maître d’œuvre";vertical-align:top;padding-top:4mm;font:bold 11px Arial,sans-serif;color:#000}@bottom-right{content:"Entreprise";vertical-align:top;padding-top:4mm;font:bold 11px Arial,sans-serif;color:#000}}
+@page land{size:A4 landscape;margin:8mm 8mm 22mm;@bottom-left{content:"Maître d’ouvrage";vertical-align:top;padding-top:4mm;font:bold 11px Arial,sans-serif;color:#000}@bottom-center{content:"Maître d’œuvre";vertical-align:top;padding-top:4mm;font:bold 11px Arial,sans-serif;color:#000}@bottom-right{content:"Entreprise";vertical-align:top;padding-top:4mm;font:bold 11px Arial,sans-serif;color:#000}}
 .land{page:land}
 @media print{
 :root,:root:not([data-theme="light"]),:root[data-theme="dark"]{--bg:#fff;--card:#fff;--tx:#000;--mut:#000;--ln:#888;--in:#fff;--bad:#000;color-scheme:light;padding:0}
