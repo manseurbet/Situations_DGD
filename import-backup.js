@@ -163,7 +163,7 @@ const fail=x=>{S.bm="L’export a échoué : "+(x&&x.message||"erreur inconnue")
 if(!files){fail(sv.err);return}
 zipX(files).then(bl=>{const a=document.createElement("a");a.href=URL.createObjectURL(bl);a.download=fn;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);
 licCnt("export-excel","Export Excel");S.bm="✅ Fichier « "+fn+" » créé (lecture seule). Conservez-le : il permet aussi de restaurer le projet.";go()}).catch(fail)}
-function restX(inp){const fl=inp.files[0];inp.value="";if(!fl)return;if(!licGate())return;
+function restX(inp,g){const fl=inp.files[0];inp.value="";if(!fl)return;if(!licGate())return;
 if(S.mode=="entreprise"&&(S.projects.length||S.entUsed)){S.bm="Profil entreprise : un seul dossier. Utilisez « Réinitialiser » pour recommencer à zéro.";go();return}
 const rd=new FileReader();rd.onload=e=>{try{if(typeof XLSX==="undefined"){S.bm="La bibliothèque Excel n’est pas chargée (connexion internet ?). Réessayez.";go();return}
 const wb=XLSX.read(e.target.result,{type:"array"}),ws=wb.Sheets["_archigest"];
@@ -171,7 +171,7 @@ if(!ws){S.bm="Ce fichier ne contient pas de données de restauration Situations_
 const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:""});if(!rows.length||rows[0][0]!=="ARCHIGEST-DZ-V1")throw new Error("format");
 const o=JSON.parse(rows.slice(1).map(r=>r[0]).join("")),q=o&&o.project;
 if(!q||typeof q.name!=="string"||!Array.isArray(q.items)||!q.items.every(it=>it&&typeof it.d==="string"&&isFinite(it.q)&&isFinite(it.pu)&&Array.isArray(it.m)))throw new Error("contenu");
-q.id=Date.now()+Math.floor(Math.random()*1000);if(S.projects.some(x=>x.name===q.name&&x.grp===q.grp))q.name+=" (restauré)";
+q.id=Date.now()+Math.floor(Math.random()*1000);if(g&&S.mode!="entreprise"){q.grp=g;S.eg=(S.eg||[]).filter(x=>x!==g)}if(S.projects.some(x=>x.name===q.name&&x.grp===q.grp))q.name+=" (restauré)";
 S.projects.push(q);S.cur=q.id;S.del=null;opn(q.id)}
 catch(x){S.bm="Fichier illisible ou endommagé : la restauration est impossible. Aucune donnée n’a été modifiée.";go()}};
 rd.onerror=()=>{S.bm="Lecture du fichier impossible.";go()};rd.readAsArrayBuffer(fl)}
