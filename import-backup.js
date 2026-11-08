@@ -137,7 +137,7 @@ files.push(["_rels/.rels",hd+`<Relationships xmlns="http://schemas.openxmlformat
 files.push(["xl/workbook.xml",hd+`<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="${R}"><bookViews><workbookView activeTab="0"/></bookViews><sheets>${sh.map((s,i)=>`<sheet name="${xa(s.nm)}" sheetId="${i+1}"${s.hid?' state="veryHidden"':""} r:id="rId${i+1}"/>`).join("")}</sheets></workbook>`]);
 files.push(["xl/_rels/workbook.xml.rels",hd+`<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sh.map((s,i)=>`<Relationship Id="rId${i+1}" Type="${R}/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join("")}<Relationship Id="rId${n+1}" Type="${R}/styles" Target="styles.xml"/></Relationships>`]);
 files.push(["xl/styles.xml",sb.xml()]);sx.forEach((x,i)=>files.push([`xl/worksheets/sheet${i+1}.xml`,x]));return files}
-function exportX(id){if(!EXPORT_ON)return;const p0=S.projects.find(x=>x.id==id);if(!p0)return;
+function exportX(id){if(!EXPORT_ON)return;if(licSt().k!="actif"){xmShow(id);return}const p0=S.projects.find(x=>x.id==id);if(!p0)return;
 const sv={cur:S.cur,tab:S.tab,msg:S.msg,pz:S.pz,cand:CAND,sit:p0.sit,avn:p0.avn,sd:p0.sd};let fn="",files=null;
 try{S.cur=id;S.msg="";S.pz=false;CAND=[];const p=p0,sh=[],used=new Set(),wm=licSt().wm,dt=new Date().toLocaleDateString("fr-FR"),note=(wm?"VERSION D’ESSAI – ":"")+"Fichier en lecture seule – exporté de Situations_DGD le "+dt+" – projet : "+p.name;
 const add=(nm,pg,nt,wf)=>sh.push({nm:shName(nm,used),m:finSheet(pg,nt,wf,wm)});
