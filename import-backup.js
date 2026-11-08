@@ -171,7 +171,7 @@ if(!ws){S.bm="Ce fichier ne contient pas de données de restauration Situations_
 const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:""});if(!rows.length||rows[0][0]!=="ARCHIGEST-DZ-V1")throw new Error("format");
 const o=JSON.parse(rows.slice(1).map(r=>r[0]).join("")),q=o&&o.project;
 if(!q||typeof q.name!=="string"||!Array.isArray(q.items)||!q.items.every(it=>it&&typeof it.d==="string"&&isFinite(it.q)&&isFinite(it.pu)&&Array.isArray(it.m)))throw new Error("contenu");
-q.id=Date.now()+Math.floor(Math.random()*1000);if(S.projects.some(x=>x.name===q.name&&x.grp===q.grp))q.name+=" (restauré)";
+q.id=Date.now()+Math.floor(Math.random()*1000);if(S.mode!="entreprise"){q.rs=1;let n="Devis restauré",k=1;while(S.projects.some(x=>x.grp===q.grp&&x.name===n))n="Devis restauré "+(++k);q.name=n}else if(S.projects.some(x=>x.name===q.name&&x.grp===q.grp))q.name+=" (restauré)";
 S.projects.push(q);S.cur=q.id;S.del=null;opn(q.id)}
 catch(x){S.bm="Fichier illisible ou endommagé : la restauration est impossible. Aucune donnée n’a été modifiée.";go()}};
 rd.onerror=()=>{S.bm="Lecture du fichier impossible.";go()};rd.readAsArrayBuffer(fl)}
