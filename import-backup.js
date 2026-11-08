@@ -20,7 +20,7 @@ const u=c.u>=0?String(r[c.u]).trim():"";if(!u)nu++;
 it.push({n:k,pre,d:dd,u,q,pu:puv,lot,m:Array(12).fill(0),av:[0,0,0]});pre=[]});
 
 if(nu)W.push(nu+" article(s) sans unité.");
-if(fx===2&&it.length)W.unshift("Aucune ligne d’en-tête reconnue : lecture par position (Code – Désignation – Unité – Quantité – Prix unitaire – Montant). Vérifiez que cet ordre est bien celui du fichier.");
+if(fx===2&&it.length&&c.mt>=0&&mS>0&&Math.abs(mS-mN)>1)W.unshift("Aucune ligne d’en-tête reconnue : lecture par position (Code – Désignation – Unité – Quantité – Prix unitaire – Montant). Vérifiez que cet ordre est bien celui du fichier.");
 it.w=W;it.tl=TL;it.chk=c.mt>=0&&mS>0?{mS,mN}:null;return it}
 let CAND=[],FN="",CM=false;
 function use(i){licCnt("devis-importe","Devis importé");const p=P(),c=CAND[i];
@@ -56,7 +56,7 @@ const NUMFR=s=>{s=s.replace(/[\u202f\u00a0]/g," ");let m=/^([−-])?\s*(\d{1,3}(
 /* ===== Export Excel : mise en page proche de l'écran (bordures, largeurs, centrage, retour à la ligne), écrit directement en .xlsx ===== */
 const XS={th:{b:1,f:"E9EDF3",al:"center",wr:1,bd:1},des:{al:"left",wr:1,bd:1},txt:{al:"left",wr:1,bd:1},ctr:{al:"center",bd:1},num:{al:"center",bd:1},
 tot:{b:1,f:"F3F5F8",al:"left",wr:1,bd:1},totn:{b:1,f:"F3F5F8",al:"center",bd:1},net:{b:1,f:"E4EAF2",sz:12,al:"left",wr:1,bd:1},netn:{b:1,f:"E4EAF2",sz:12,al:"center",bd:1},
-p:{al:"left",wr:1,va:"top"},note:{i:1,c:"6B7280",sz:10,al:"left",wr:1,va:"top"},wm:{b:1,c:"C00000",sz:12,al:"left",wr:1,va:"top"}};
+p:{al:"left",wr:1,va:"top"},note:{i:1,c:"6B7280",sz:10,al:"left",wr:1,va:"top"},wm:{b:1,c:"C00000",sz:12,al:"left",wr:1,va:"top"},sig:{b:1,al:"center"}};
 const xe=s=>String(s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/g,"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"),xa=s=>xe(s).replace(/"/g,"&quot;");
 const cl=n=>{let s="";for(n++;n>0;n=Math.floor((n-1)/26))s=String.fromCharCode(65+(n-1)%26)+s;return s};
 function styleBook(){const keys=[""],ix={"":0},id=k=>{if(!(k in ix)){ix[k]=keys.length;keys.push(k)}return ix[k]};
@@ -107,6 +107,10 @@ if(wf)W[0]=wf;else if(nc==1&&W[0]<60)W[0]=100;
 const tw=W.reduce((a,b)=>a+b,0),H=[];
 A=A.map((r,ri)=>{if(r.length==1&&r[0]&&r[0].k=="para"){const c=r[0],o=[c];for(let i=1;i<nc;i++)o.push({v:"",s:c.s,k:"fill",l:0});if(nc>1)MG.push({r1:ri,c1:0,r2:ri,c2:nc-1});
 const ln=Math.ceil(c.l*1.1/Math.max(tw,20));if(ln>1)H[ri]=ln*15+2;return o}return r});
+{const rr=A.length,sg=["Maître d’ouvrage","Maître d’œuvre","Entreprise"],row=[];for(let i=0;i<nc;i++)row.push({v:"",s:"sig",k:"fill",l:0});
+if(nc>=3){const a=Math.floor(nc/3),b=nc-a;[[0,a-1],[a,b-1],[b,nc-1]].forEach((g,j)=>{row[g[0]].v=sg[j];if(g[1]>g[0])MG.push({r1:rr+1,c1:g[0],r2:rr+1,c2:g[1]})})}
+else{row[0].v=sg.join("          ");if(nc>1)MG.push({r1:rr+1,c1:0,r2:rr+1,c2:nc-1})}
+A.push([]);A.push(row);A.push([]);H[rr+1]=20;H[rr+2]=64}
 return{A,MG,BR,W,H,land:tw>105,wm:!!wm}}
 function sheetXml(m,sb,first,prot){const{A,MG,BR,W,H}=m,nc=W.length;
 const rows=A.map((r,ri)=>`<row r="${ri+1}"${H&&H[ri]?` ht="${H[ri]}" customHeight="1"`:""}>${r.map((c,ci)=>{if(!c)return"";const ref=cl(ci)+(ri+1),s=c.s&&sb?` s="${sb.id(c.s)}"`:"";
@@ -114,7 +118,7 @@ if(c.v===""||c.v==null)return`<c r="${ref}"${s}/>`;
 if(typeof c.v=="number"&&isFinite(c.v))return`<c r="${ref}"${s}><v>${c.v}</v></c>`;
 return`<c r="${ref}"${s} t="inlineStr"><is><t xml:space="preserve">${xe(c.v)}</t></is></c>`}).join("")}</row>`).join("");
 const mg=(MG||[]).filter(x=>x.r2>x.r1||x.c2>x.c1);
-return`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><dimension ref="A1:${cl(nc-1)}${Math.max(A.length,1)}"/><sheetViews><sheetView${first?' tabSelected="1"':""} workbookViewId="0" showGridLines="0"/></sheetViews><sheetFormatPr defaultRowHeight="15"/><cols>${W.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join("")}</cols><sheetData>${rows}</sheetData>${prot?'<sheetProtection sheet="1" objects="1" scenarios="1"/>':""}${mg.length?`<mergeCells count="${mg.length}">${mg.map(x=>`<mergeCell ref="${cl(x.c1)}${x.r1+1}:${cl(x.c2)}${x.r2+1}"/>`).join("")}</mergeCells>`:""}<pageMargins left="0.4" right="0.4" top="0.5" bottom="1.4" header="0.3" footer="1"/><pageSetup paperSize="9" orientation="${m.land?"landscape":"portrait"}" fitToHeight="0"/><headerFooter>${m.wm?'<oddHeader>&amp;C&amp;"-,Bold"&amp;16&amp;KFF0000VERSION D’ESSAI</oddHeader>':""}<oddFooter>&amp;LMaître d’ouvrage&amp;CMaître d’œuvre&amp;REntreprise</oddFooter></headerFooter>${BR&&BR.length?`<rowBreaks count="${BR.length}" manualBreakCount="${BR.length}">${BR.map(b=>`<brk id="${b}" max="16383" man="1"/>`).join("")}</rowBreaks>`:""}</worksheet>`}
+return`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><dimension ref="A1:${cl(nc-1)}${Math.max(A.length,1)}"/><sheetViews><sheetView${first?' tabSelected="1"':""} workbookViewId="0" showGridLines="0"/></sheetViews><sheetFormatPr defaultRowHeight="15"/><cols>${W.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join("")}</cols><sheetData>${rows}</sheetData>${prot?'<sheetProtection sheet="1" objects="1" scenarios="1"/>':""}${mg.length?`<mergeCells count="${mg.length}">${mg.map(x=>`<mergeCell ref="${cl(x.c1)}${x.r1+1}:${cl(x.c2)}${x.r2+1}"/>`).join("")}</mergeCells>`:""}<pageMargins left="0.4" right="0.4" top="0.5" bottom="0.5" header="0.3" footer="0.3"/><pageSetup paperSize="9" orientation="${m.land?"landscape":"portrait"}" fitToHeight="0"/>${m.wm?'<headerFooter><oddHeader>&amp;C&amp;"-,Bold"&amp;16&amp;KFF0000VERSION D’ESSAI</oddHeader></headerFooter>':""}${BR&&BR.length?`<rowBreaks count="${BR.length}" manualBreakCount="${BR.length}">${BR.map(b=>`<brk id="${b}" max="16383" man="1"/>`).join("")}</rowBreaks>`:""}</worksheet>`}
 function shName(n,used){n=n.replace(/[\[\]:*?\/\\]/g," ").slice(0,31);let b=n,i=2;while(used.has(n.toLowerCase())){n=b.slice(0,28)+" "+i++}used.add(n.toLowerCase());return n}
 /* archive .xlsx (zip) écrite à la main : compressée si le navigateur le permet */
 const CRCT=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
