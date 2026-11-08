@@ -124,7 +124,7 @@ const tv=[r.mm,r.prev,r.mois,r.cum],T3=["TOTAL EN HT","TVA "+p.tva+" %","TOTAL E
 const rec=Object.entries(g).map(([k,o])=>{const m=k.match(/^(LOT\s*\d+\s*\)?)\s*(.*)$/i);return`<tr><td>${esc(m?m[1]:"")}</td><td>${esc(m?m[2]:k)}</td>${o.map(C).join("")}</tr>`}).join(""),ct=[0,1,2,3].map(i=>Object.values(g).reduce((a,o)=>ta(a+o[i]),0));
 const R3=["TOTAL GÉNÉRAL en H.T","T.V.A "+p.tva+" %","TOTAL GÉNÉRAL en T.T.C"].map((l,k)=>`<tr class="tot"><td colspan="2">${l}</td>${D4(ct,p.tva)[k].map(C).join("")}</tr>`).join("");
 const ce=`style="text-align:center"`;
-return selS(p)+`<div class="land"><div class="card sc">${hdr(p)}${PJ(p)}<b>DÉCOMPTE N° ${p.sit}</b><table style="margin-top:6px"><tr><th rowspan="2" class="s1">CODE</th><th rowspan="2" class="s2">DÉSIGNATION DES OUVRAGES</th><th rowspan="2">U</th><th colspan="4" ${ce}>Quantité</th><th rowspan="2" class="r">P-U</th><th colspan="4" ${ce}>Montant</th></tr><tr><th class="r">Marché</th><th class="r">Précédent</th><th class="r">Mois</th><th class="r">Cumulé</th><th class="r">Marché</th><th class="r">Précédent</th><th class="r">Mois</th><th class="r">Cumulé</th></tr>${rows}${T3}</table><p>Arrêté le montant du présent décompte (cumulé) à la somme de (en TTC) :<br><b>${lettres(D4(tv,p.tva)[2][3],1)}</b></p></div>
+return selS(p,"Décompte")+`<div class="land"><div class="card sc">${hdr(p)}${PJ(p)}<b>DÉCOMPTE N° ${p.sit}</b><table style="margin-top:6px"><tr><th rowspan="2" class="s1">CODE</th><th rowspan="2" class="s2">DÉSIGNATION DES OUVRAGES</th><th rowspan="2">U</th><th colspan="4" ${ce}>Quantité</th><th rowspan="2" class="r">P-U</th><th colspan="4" ${ce}>Montant</th></tr><tr><th class="r">Marché</th><th class="r">Précédent</th><th class="r">Mois</th><th class="r">Cumulé</th><th class="r">Marché</th><th class="r">Précédent</th><th class="r">Mois</th><th class="r">Cumulé</th></tr>${rows}${T3}</table><p>Arrêté le montant du présent décompte (cumulé) à la somme de (en TTC) :<br><b>${lettres(D4(tv,p.tva)[2][3],1)}</b></p></div>
 <div class="card sc pgb"><b>RÉCAPITULATIF DU DÉCOMPTE N° ${p.sit}</b><table style="margin-top:6px"><tr><th>N°</th><th>Désignation des ouvrages</th><th class="r">Marché</th><th class="r">Précédent</th><th class="r">Mois</th><th class="r">Cumul</th></tr>${rec}${R3}</table><p>Arrêté le montant du présent décompte (cumulé) à la somme de (en TTC) :<br><b>${lettres(D4(ct,p.tva)[2][3],1)}</b></p></div></div>
 <div class="row np"><button onclick="fin('print')">🖨️ Imprimer</button></div>`}
 
@@ -255,7 +255,7 @@ return gnav("d")+`<div class="land"><div class="card sc">${hdr(p)}<div>PROJET : 
 function vRecG(p){return vRecGen(p,"g")}
 function vRecS(p){return vRecGen(p,"s")}
 function vRecGen(p,part){const n=p.sit,ms=GM(p);
-if(ms.length<2)return selS(p)+`<div class="card">Ce projet ne contient qu’un seul devis. Dans « Ouvrir », le bouton « ➕ Devis » permet d’en ajouter.</div>`;
+if(ms.length<2)return selS(p,part=="s"?"Situation":"Décompte")+`<div class="card">Ce projet ne contient qu’un seul devis. Dans « Ouvrir », le bouton « ➕ Devis » permet d’en ajouter.</div>`;
 const C=x=>`<td class="r">${fp(x)}</td>`,N=ms.map(q=>({q,s:sitNums(q,n)})),cs=s=>[0,1,2,3].map(i=>Object.values(s.g).reduce((a,o)=>ta(a+o[i]),0)),
 sm=f=>N.reduce((a,x)=>ta(a+f(x.s,x.q)),0),same=ms.every(q=>q.tva==ms[0].tva);
 const rows=N.map(({q,s})=>`<tr><td colspan="6"><b>${esc(q.name)}</b></td></tr>`+Object.entries(s.g).map(([k,o])=>{const m=k.match(/^(LOT\s*\d+\s*\)?)\s*(.*)$/i);return`<tr><td>${esc(m?m[1]:"")}</td><td>${esc(m?m[2]:k)}</td>${o.map(C).join("")}</tr>`}).join("")+`<tr class="tot"><td colspan="2">TOTAL ${esc(q.name)} ( H.T )</td>${cs(s).map(C).join("")}</tr>`).join("");
@@ -271,7 +271,7 @@ ${cau>0?`<div style="color:var(--mut);font-size:12px;margin-top:6px">Caution de 
 <p>Le montant net à payer par la présente situation s’élève à la somme de ( en toutes taxes ) :<br><b>${lettres(net,0)}</b></p>
 <b style="display:block;margin-top:10px">Détail par devis</b><table style="margin-top:6px"><tr><th>Devis</th><th class="r">Montant HT</th><th class="r">T.V.A</th><th class="r">TTC</th><th class="r">Retenue</th><th class="r">Pénalités</th><th class="r">Net à payer</th></tr>${det}${dt}</table>
 <div style="margin-top:8px">Fait à …………… le ……………</div></div>`;
-return selS(p)+gnav(part)+(part=="s"?c2:c1)+`<div class="row np"><button onclick="fin('print')">🖨️ Imprimer</button></div>`}
+return selS(p,part=="s"?"Situation":"Décompte")+gnav(part)+(part=="s"?c2:c1)+`<div class="row np"><button onclick="fin('print')">🖨️ Imprimer</button></div>`}
 
 /* ================================================================
    AFFICHAGE — table des pages (VW) et render()
