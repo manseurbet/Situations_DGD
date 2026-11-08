@@ -34,9 +34,9 @@ const save=()=>{try{localStorage.setItem("archigest_dz",JSON.stringify(S));OK=tr
 const P=()=>S.projects.find(p=>p.id===S.cur);
 function mk(name){return{id:Date.now(),name,moa:"",ent:"",gar:"caution",contrat:"",objet:"",montant:0,doit:"",adr:"",rc:"",nif:"",nis:"",art:"",rib:"",bq:"",tva:19,ret:5,items:[],adj:{},sit:1}}
 function setMode(m){S.mode=m;S.del=null;go()}
-function np(){if(!licGate())return;licCnt("projet-cree","Projet créé");if(S.mode=="entreprise"&&(S.projects.length||S.entUsed)){S.bm="Profil entreprise : un seul dossier. Utilisez OUVRIR pour le reprendre.";go();return}const p=mk("Nouveau projet");if(S.mode=="entreprise")S.entUsed=true;S.projects.push(p);S.cur=p.id;S.tab="devis";S.del=null;go()}
+function np(){npj()}
 function dp(){if(S.del==S.cur){S.projects=S.projects.filter(x=>x.id!=S.cur);S.cur=S.projects[0]?S.projects[0].id:null;S.del=null}else S.del=S.cur;go()}
-function go(t){if(t){if(t=="infos"&&S.tab!="infos")S.prev=S.tab;S.tab=t;S.msg="";S.bm="";S.sm=""}save();render()}
+function go(t){if(t){if(t=="infos"&&S.tab!="infos")S.prev=S.tab;S.tab=t;S.msg="";S.bm="";S.sm="";if(t!="projets")S.nw=false;const q=S.cur&&S.projects.find(x=>x.id==S.cur);if(q&&/^(devis|attachement|decompte|situation|avenants|dgd)$/.test(t))q.lt=t}save();render()}
 function set(k,v){P()[k]=v;go()}
 function ai(){P().items.push({d:"",u:"m²",q:0,pu:0,m:Array(12).fill(0),av:[0,0,0]});go()}
 function di(i){P().items.splice(i,1);go()}

@@ -171,8 +171,8 @@ if(!ws){S.bm="Ce fichier ne contient pas de données de restauration Situations_
 const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:""});if(!rows.length||rows[0][0]!=="ARCHIGEST-DZ-V1")throw new Error("format");
 const o=JSON.parse(rows.slice(1).map(r=>r[0]).join("")),q=o&&o.project;
 if(!q||typeof q.name!=="string"||!Array.isArray(q.items)||!q.items.every(it=>it&&typeof it.d==="string"&&isFinite(it.q)&&isFinite(it.pu)&&Array.isArray(it.m)))throw new Error("contenu");
-q.id=Date.now()+Math.floor(Math.random()*1000);if(S.projects.some(x=>x.name===q.name))q.name+=" (restauré)";
-S.projects.push(q);S.tab="ouvrir";S.del=null;S.bm="✅ Projet « "+q.name+" » restauré ("+q.items.length+" articles, "+Object.keys(q.val||{}).length+" attachement(s) validé(s)). Ouvrez-le dans la liste ci-dessous.";go()}
+q.id=Date.now()+Math.floor(Math.random()*1000);if(S.projects.some(x=>x.name===q.name&&x.grp===q.grp))q.name+=" (restauré)";
+S.projects.push(q);S.cur=q.id;S.del=null;opn(q.id)}
 catch(x){S.bm="Fichier illisible ou endommagé : la restauration est impossible. Aucune donnée n’a été modifiée.";go()}};
 rd.onerror=()=>{S.bm="Lecture du fichier impossible.";go()};rd.readAsArrayBuffer(fl)}
 const RSB=`<label class="btn" style="display:block;text-align:center;font-size:16px;padding:14px">📥 Restaurer depuis un fichier Excel<input type="file" accept=".xlsx" style="display:none" onchange="restX(this)"></label>`;
