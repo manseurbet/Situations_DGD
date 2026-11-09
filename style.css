@@ -6,6 +6,10 @@ html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,"Segoe UI",Arial,sans-serif}
 header{padding:12px 14px 4px;font-weight:700;font-size:18px}
 header small{display:block;font-weight:400;font-size:12px;color:var(--mut)}
+.brand{font:inherit;margin:0}
+#apropos{max-width:720px;margin:0 auto;padding:4px 16px 90px;font-size:12px;line-height:1.5;color:var(--mut)}
+#apropos h2{font-size:13px;margin:0 0 4px;font-weight:700}
+#apropos p{margin:0}
 nav{position:fixed;left:0;right:0;bottom:0;z-index:10;display:flex;background:var(--card);border-top:1px solid var(--ln);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px))}
 nav button{flex:1;min-width:0;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:10px;padding:4px 0;color:var(--mut)}
 nav button span{font-size:20px}
@@ -49,7 +53,7 @@ input[type=number]{-moz-appearance:textfield}
 .sig{display:none}
 @media print{
 :root,:root:not([data-theme="light"]),:root[data-theme="dark"]{--bg:#fff;--card:#fff;--tx:#000;--mut:#000;--ln:#888;--in:#fff;--bad:#000;color-scheme:light;padding:0}
-header,nav,.np{display:none!important}
+header,nav,.np,#apropos{display:none!important}
 body{background:#fff;color:#000;font-size:11px}
 main{max-width:none;padding:0}
 .card{border:0;border-radius:0;padding:0;margin:0 0 6px}

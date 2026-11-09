@@ -1,7 +1,7 @@
 {
  "name": "Situations_DGD",
  "short_name": "Situations_DGD",
- "description": "Suivi des situations de travaux pour cabinets d’architecture",
+ "description": "Devis, attachements, décomptes, situations et DGD pour bureaux d’études et entreprises BTP en Algérie",
  "lang": "fr",
  "start_url": "./index.html",
  "scope": "./",

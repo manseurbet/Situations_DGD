@@ -281,7 +281,7 @@ const VW={recapa:vRecA,recaps:vRecS,recapd:vRecD,recapg:vRecG,devis:vDevis,infos
 function render(){const p=P();if(!VW[S.tab]&&S.tab!="projets"&&S.tab!="ouvrir")S.tab="projets";if(LT!==null&&S.tab!==LT){LA=false;LM="";LG=""}LT=S.tab;const lk=licSt().k=="fin";
 $("#pn").textContent=lk?"":p?(p.grp&&S.mode!="entreprise"?p.grp+" › ":"")+p.name:"";
 $("#nav").innerHTML=TABS.map(([k,i,l])=>`<button class="${S.tab==k||(k=="projets"&&(S.tab=="infos"||S.tab=="ouvrir"))?"on":""}" ${lk||(k!="projets"&&!p)?"disabled":""} onclick="go('${k}')"><span>${i}</span>${l}</button>`).join("");
-$("#v").innerHTML=(lk?licW(""):S.tab=="ouvrir"?vOuvrir():S.tab=="projets"||!p?vProj():VW[S.tab](p))+CPY;document.body.classList.toggle("wm",licSt().wm)}
+$("#v").innerHTML=(lk?licW(""):S.tab=="ouvrir"?vOuvrir():S.tab=="projets"||!p?vProj():VW[S.tab](p))+CPY;{const ap=document.getElementById("apropos");if(ap)ap.hidden=S.tab!="projets"}document.body.classList.toggle("wm",licSt().wm)}
 
 /* ================================================================
    LICENCE — carte d’état (essai / active), saisie du code d’activation, mention © en bas de page
