@@ -303,7 +303,7 @@ return`<div class="card np" id="lic" style="font-size:13px;text-align:center">${
 /* barrière : refuse la création d’un projet, d’un devis ou la restauration tant qu’aucune licence n’est active */
 function licGate(){if(["actif","essai"].includes(licSt().k))return true;LA=false;LM="";LG="🔒 Code requis.";go();setTimeout(()=>{const e=document.getElementById("lic");if(e)e.scrollIntoView({block:"center"})},60);return false}
 /* événement GoatCounter : si le compteur n'est pas encore chargé (activation par lien dès l'ouverture), on réessaie pendant quelques secondes */
-function licCnt(p,t){const go1=()=>{try{goatcounter.count({path:p,title:t,event:true})}catch(e){}};
+function licCnt(p,t){try{gtag("event",String(p).replace(/-/g,"_"),{event_title:t})}catch(e){}const go1=()=>{try{goatcounter.count({path:p,title:t,event:true})}catch(e){}};
 if(window.goatcounter&&goatcounter.count){go1();return}let n=0;const iv=setInterval(()=>{if(window.goatcounter&&goatcounter.count){clearInterval(iv);go1()}else if(++n>40)clearInterval(iv)},250)}
 function licEssai(){if(!LIC.ts){LIC.ts=Date.now();licSave();licCnt("essai-demarre","Essai démarré")}LG="";go("projets")}
 /* export Excel : code obligatoire — fenêtre avec seulement « Demander un code » et « J’ai un code » ; après activation, l’export part tout seul */
