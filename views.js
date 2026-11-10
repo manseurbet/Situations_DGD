@@ -286,10 +286,10 @@ $("#v").innerHTML=(lk?licW(""):S.tab=="ouvrir"?vOuvrir():S.tab=="projets"||!p?vP
 /* ================================================================
    LICENCE — carte d’état (essai / active), saisie du code d’activation, mention © en bas de page
    ================================================================ */
-const CPY=`<div class="np" style="text-align:center;font-size:11px;color:var(--mut);margin:8px 0 14px">© 2026 Manseur BET · Situations_DGD · Tous droits réservés</div>`;
+const CPY=`<div class="np" style="text-align:center;font-size:11px;color:var(--mut);margin:8px 0 14px">© 2026 Manseur BET · situation-dgd.com · Tous droits réservés</div>`;
 let LA=false,LM="",LN="",LC="",LG="",LT=null;
 const licDt=ms=>new Date(ms).toLocaleDateString("fr-FR");
-const LWA="https://wa.me/213556751401?text="+encodeURIComponent("Bonjour, je souhaite recevoir un code pour l’application Situations_DGD.\nNom / cabinet : ");
+const LWA="https://wa.me/213556751401?text="+encodeURIComponent("Bonjour, je souhaite recevoir un code pour situation-dgd.com.\nNom / cabinet : ");
 function licCard(){const s=licSt(),wa=LWA;let h;
 if(s.k=="actif")h=`✅ <b>Licence active</b> – ${esc(s.name)} · ${s.exp?"valable jusqu’au "+licDt(s.exp):"sans limite de durée"}`;
 else if(s.k=="essai")h=`🕒 <b>Essai</b> : ${s.left} jour${s.left>1?"s":""}`;

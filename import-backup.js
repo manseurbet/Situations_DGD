@@ -139,7 +139,7 @@ files.push(["xl/_rels/workbook.xml.rels",hd+`<Relationships xmlns="http://schema
 files.push(["xl/styles.xml",sb.xml()]);sx.forEach((x,i)=>files.push([`xl/worksheets/sheet${i+1}.xml`,x]));return files}
 function exportX(id){if(!EXPORT_ON)return;if(licSt().k!="actif"){xmShow(id);return}const p0=S.projects.find(x=>x.id==id);if(!p0)return;
 const sv={cur:S.cur,tab:S.tab,msg:S.msg,pz:S.pz,cand:CAND,sit:p0.sit,avn:p0.avn,sd:p0.sd};let fn="",files=null;
-try{S.cur=id;S.msg="";S.pz=false;CAND=[];const p=p0,sh=[],used=new Set(),wm=licSt().wm,dt=new Date().toLocaleDateString("fr-FR"),note=(wm?"VERSION D’ESSAI – ":"")+"Fichier en lecture seule – exporté de Situations_DGD le "+dt+" – projet : "+p.name;
+try{S.cur=id;S.msg="";S.pz=false;CAND=[];const p=p0,sh=[],used=new Set(),wm=licSt().wm,dt=new Date().toLocaleDateString("fr-FR"),note=(wm?"VERSION D’ESSAI – ":"")+"Fichier en lecture seule – exporté de situation-dgd.com le "+dt+" – projet : "+p.name;
 const add=(nm,pg,nt,wf)=>sh.push({nm:shName(nm,used),m:finSheet(pg,nt,wf,wm)});
 const cards=html=>{const d=document.createElement("div");d.innerHTML=String(html).replace(/<br\s*\/?>/gi,"\u2028");const o=[];[...d.children].forEach(c=>(c.classList.contains("land")?[...c.children]:[c]).forEach(x=>{if(!x.matches(".np")&&x.querySelector("table"))o.push(x)}));return o};
 const merge=cs=>{const A=[],MG=[],BR=[];cs.forEach((c,i)=>{const g=pageRows(c),o=A.length;if(i)BR.push(o);g.MG.forEach(m=>MG.push({r1:m.r1+o,c1:m.c1,r2:m.r2+o,c2:m.c2}));g.BR.forEach(b=>BR.push(b+o));g.A.forEach(r=>A.push(r))});return{A,MG,BR}};
@@ -157,7 +157,7 @@ put(["DGD","Récap DGD"],VW.dgd(p));
 /* données de restauration (feuille très cachée) */
 const js=JSON.stringify({v:1,app:"archigest-dz",at:new Date().toISOString(),project:p}),R=[[{v:"ARCHIGEST-DZ-V1"}]];for(let i=0;i<js.length;i+=30000)R.push([{v:js.slice(i,i+30000)}]);
 sh.push({nm:"_archigest",hid:1,m:{A:R,MG:[],BR:[],W:[20],H:[],land:false}});
-fn=(p.name.replace(/[\\/:*?"<>|]+/g," ").trim().slice(0,60)||"projet")+" – Situations_DGD – "+new Date().toISOString().slice(0,10)+".xlsx";
+fn=(p.name.replace(/[\\/:*?"<>|]+/g," ").trim().slice(0,60)||"projet")+" – situation-dgd.com – "+new Date().toISOString().slice(0,10)+".xlsx";
 files=buildXlsx(sh)}catch(x){sv.err=x}finally{p0.sit=sv.sit;p0.avn=sv.avn;p0.sd=sv.sd;S.cur=sv.cur;S.tab=sv.tab;S.msg=sv.msg;S.pz=sv.pz;CAND=sv.cand}
 const fail=x=>{S.bm="L’export a échoué : "+(x&&x.message||"erreur inconnue")+". Rien n’a été modifié dans vos données.";go()};
 if(!files){fail(sv.err);return}
@@ -167,7 +167,7 @@ function restX(inp){const fl=inp.files[0];inp.value="";if(!fl)return;if(!licGate
 if(S.mode=="entreprise"&&(S.projects.length||S.entUsed)){S.bm="Profil entreprise : un seul dossier. Utilisez « Réinitialiser » pour recommencer à zéro.";go();return}
 const rd=new FileReader();rd.onload=e=>{try{if(typeof XLSX==="undefined"){S.bm="La bibliothèque Excel n’est pas chargée (connexion internet ?). Réessayez.";go();return}
 const wb=XLSX.read(e.target.result,{type:"array"}),ws=wb.Sheets["_archigest"];
-if(!ws){S.bm="Ce fichier ne contient pas de données de restauration Situations_DGD (il n’a pas été exporté par l’application). Pour un devis, utilisez « Importer un devis ».";go();return}
+if(!ws){S.bm="Ce fichier ne contient pas de données de restauration situation-dgd.com (il n’a pas été exporté par l’application). Pour un devis, utilisez « Importer un devis ».";go();return}
 const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:""});if(!rows.length||rows[0][0]!=="ARCHIGEST-DZ-V1")throw new Error("format");
 const o=JSON.parse(rows.slice(1).map(r=>r[0]).join("")),q=o&&o.project;
 if(!q||typeof q.name!=="string"||!Array.isArray(q.items)||!q.items.every(it=>it&&typeof it.d==="string"&&isFinite(it.q)&&isFinite(it.pu)&&Array.isArray(it.m)))throw new Error("contenu");
