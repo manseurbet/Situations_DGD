@@ -4,7 +4,7 @@ for(let i=0;i<Math.min(rows.length,25)&&!c;i++){const r=rows[i].map(x=>String(x)
 if(d>=0&&q>=0&&pu>=0){c={k:f(x=>/^(code|n°)/.test(x)),d,u:f(x=>x=="u"||/^unit/.test(x)),q,pu,mt:f(x=>/^montant/.test(x))};s=i+1}}
 if(!c&&fx){c={k:0,d:1,u:2,q:3,pu:4,mt:5};rows=rows.map(r=>{const a=Array.from(r);while(a.length<6)a.push("");return a});for(let i=0;i<Math.min(rows.length,40);i++){const t=rows[i].map(x=>String(x).trim()).join(" ");if(/d[ée]signation|libell[ée]/i.test(t)&&!(num(rows[i][3])>0))s=i+1}if(s===0)for(let i=0;i<rows.length;i++){const r=rows[i];if(/^lot\s*\d/i.test(String(r[1]).trim())||/^lot\s*\d/i.test(String(r[0]).trim())||(num(r[3])>0&&num(r[4])>0)){s=i;break}}}
 if(!c)return[];
-const it=[],W=[],TL=[],seen={},TOTX=/(^|[^a-zà-ÿ])(total|montant|t\.?v\.?a|t\.?t\.?c|h\.?t|net\s+à\s+payer|toutes\s+taxes)([^a-zà-ÿ]|$)/i,sn=t=>t.length>40?t.slice(0,40)+"…":t,isT=t=>/(^|[\s\/])total([^a-zà-ÿ]|$)/i.test(t),glob=t=>/g[ée]n[ée]ral|t\.?t\.?c|toutes\s+taxes|^\s*t\.?v\.?a\b/i.test(t)||/^\s*total\s*(en\s*)?h\.?t\.?\s*:?\s*$/i.test(t);let lot="",pre=[],mS=0,mN=0,nu=0;
+const it=[],W=[],TL=[],seen={},TOTX=/(^|[^a-zà-ÿ])(total|montant|t\.?v\.?a|t\.?t\.?c|h\.?t|net\s+à\s+payer|toutes\s+taxes)([^a-zà-ÿ]|$)/i,sn=t=>t,isT=t=>/(^|[\s\/])total([^a-zà-ÿ]|$)/i.test(t),glob=t=>/g[ée]n[ée]ral|t\.?t\.?c|toutes\s+taxes|^\s*t\.?v\.?a\b/i.test(t)||/^\s*total\s*(en\s*)?h\.?t\.?\s*:?\s*$/i.test(t);let lot="",pre=[],mS=0,mN=0,nu=0;
 let stp=false;rows.slice(s).forEach((r,ix)=>{const ln=s+ix+1,dd=String(r[c.d]).replace(/\s+/g," ").trim(),k=c.k>=0?String(r[c.k]).trim():"",q=num(r[c.q]),pu=num(r[c.pu]),mt=c.mt>=0?num(r[c.mt]):NaN,last=it[it.length-1];
 if(stp)return;if(!(q>0)){const tx0=Array.from(r).map(x=>String(x).replace(/\s+/g," ").trim()).filter(x=>x&&isNaN(num(x))).join(" ");if(/(^|[^a-zà-ÿ])(t\.?v\.?a|t\.?t\.?c)([^a-zà-ÿ]|$)/i.test(tx0)){stp=true;TL.push(ln);return}}
 const sub=lb=>{if(last&&!glob(lb)){(last.sub=last.sub||[]).push(lb);const m=lb.match(/^\s*total\s*lot\s*(\d+)/i);if(m)for(let j=it.length-1;j>=0&&!it[j].lot;j--)it[j].lot="LOT "+m[1]}};
@@ -21,10 +21,10 @@ it.push({n:k,pre,d:dd,u,q,pu:puv,lot,m:Array(12).fill(0),av:[0,0,0]});pre=[]});
 
 if(nu)W.push(nu+" article(s) sans unité.");
 if(fx===2&&it.length&&c.mt>=0&&mS>0&&Math.abs(mS-mN)>1)W.unshift("Aucune ligne d’en-tête reconnue : lecture par position (Code – Désignation – Unité – Quantité – Prix unitaire – Montant). Vérifiez que cet ordre est bien celui du fichier.");
-it.w=W;it.tl=TL;it.chk=c.mt>=0&&mS>0?{mS,mN}:null;return it}
-let CAND=[],FN="",CM=false;
+it.std=!fx&&c.d>=0&&c.u>=0&&c.q>=0&&c.pu>=0&&c.mt>=0;it.w=W;it.tl=TL;it.chk=c.mt>=0&&mS>0?{mS,mN}:null;return it}
+let CAND=[],FN="",CM=false;const NONCONF="Le devis n’est pas conforme au standard. Colonnes : Code, Désignation, Unité, Quantité, Prix unitaire, Montant.";
 function use(i){licCnt("devis-importe","Devis importé");const p=P(),c=CAND[i];
-if(CM){const n=p.avn||1;p.cp=p.cp||{};p.cp[n]=c.it.map(x=>({n:x.n||"",d:x.d,u:x.u,q:x.q,pu:x.pu}));S.msg=c.it.length+" article(s) complémentaire(s) importé(s) depuis « "+c.nm+" » : total HT "+fmt(c.t)+" DA. Comparez avec votre devis complémentaire.";CAND=[];CM=false;go();return}
+if(CM){const n=p.avn||1;p.cp=p.cp||{};p.cpImp=p.cpImp||{};p.cpImp[n]=1;p.cp[n]=c.it.map(x=>({n:x.n||"",pre:(x.pre||[]).map(h=>Object.assign({},h)),d:x.d,u:x.u,q:x.q,pu:x.pu,lot:x.lot||""}));S.msg=c.it.length+" article(s) complémentaire(s) importé(s) depuis « "+c.nm+" » : total HT "+fmt(c.t)+" DA. Comparez avec votre devis complémentaire.";CAND=[];CM=false;go();return}
 p.items=c.it.slice();p.adj={};p.sit=1;p.val={};p.lock=true;if((S.pn||"").trim())p.name=S.pn.trim();if(p.name==="Nouveau projet"&&FN)p.name=FN.replace(/\.[^.]+$/,"");S.msg=c.it.length+" articles importés depuis « "+c.nm+" » : total HT "+fmt(c.t)+" DA. Comparez avec le total de votre devis.";CAND=[];S.pt="";S.pn="";S.pz=false;S.tab="devis";go()}
 function cands(l){CAND=l.filter(x=>x.it.length).map(x=>Object.assign(x,{t:x.it.reduce((a,y)=>a+y.q*y.pu,0)}));
 if(!CAND.length){S.msg="Aucun article reconnu : vérifiez que les colonnes sont dans l’ordre Code, Désignation, Unité, Quantité, Prix unitaire, Montant.";go();return}
@@ -32,8 +32,8 @@ S.msg="";go()}
 function cn(){CM=false;if(CAND[0]&&CAND[0].nm=="Texte collé")S.pz=true;CAND=[];S.msg="";go()}
 function imp(inp,cm){if(!IMPORT_FILE_ON){inp.value="";return}const fl=inp.files[0];if(!fl)return;const p=P();CM=!!cm;if(!cm&&Object.keys(p.val||{}).length){S.msg="Devis verrouillé : des attachements sont déjà validés.";go();return}
 const rd=new FileReader();FN=fl.name;
-rd.onload=e=>{try{if(typeof XLSX==="undefined"){S.msg="La bibliothèque de lecture Excel n’est pas chargée (connexion internet ?). Vérifiez votre connexion puis réessayez.";go();return}const wb=XLSX.read(e.target.result,{type:"array"});
-const sh=wb.SheetNames.filter(n=>!/infrastructure/i.test(n)).map(nm=>({nm,rw:XLSX.utils.sheet_to_json(wb.Sheets[nm],{header:1,defval:""})}));let l=sh.map(x=>({nm:x.nm,it:parseSheet(x.rw)}));if(!l.some(x=>x.it.length))l=sh.map(x=>({nm:x.nm,it:parseSheet(x.rw,2)}));cands(l)}catch(x){S.msg="Fichier illisible. Utilisez un fichier Excel ou CSV.";go()}};
+rd.onload=e=>{try{if(typeof XLSX==="undefined"){S.msg="La bibliothèque de lecture Excel n’est pas chargée (connexion internet ?). Vérifiez votre connexion puis réessayez.";go();return}const wb=XLSX.read(e.target.result,{type:"array"});if(wb.Sheets&&wb.Sheets["_archigest"]){if(p&&!p.items.length&&p.name==="Mon projet"){S.projects=S.projects.filter(x=>x!==p);S.cur=null}S.msg="Ce fichier est une sauvegarde : utilisez « Restaurer » sur l’accueil.";go();return}
+const sh=wb.SheetNames.filter(n=>!/infrastructure/i.test(n)).map(nm=>({nm,rw:XLSX.utils.sheet_to_json(wb.Sheets[nm],{header:1,defval:""})}));const tot=it=>it.reduce((a,y)=>a+y.q*y.pu,0);let l=sh.map(x=>({nm:x.nm,it:parseSheet(x.rw)}));let ok=l.filter(x=>x.it.length&&x.it.std&&tot(x.it)>0);if(!ok.length){l=sh.map(x=>({nm:x.nm,it:parseSheet(x.rw,2)}));ok=l.filter(x=>x.it.length&&tot(x.it)>0)}if(!ok.length){S.msg=NONCONF;CAND=[];go();return}cands(ok)}catch(x){S.msg="Fichier illisible. Utilisez un fichier Excel ou CSV.";go()}};
 rd.onerror=()=>{S.msg="Lecture du fichier impossible. Réessayez avec un fichier Excel ou CSV.";go()};rd.readAsArrayBuffer(fl)}
 function ptab(t){const R=[];let r=[],f="",q=false;for(let i=0;i<t.length;i++){const ch=t[i];if(q){if(ch=='"'){if(t[i+1]=='"'){f+='"';i++}else q=false}else f+=ch}else if(ch=='"'&&f==="")q=true;else if(ch=="\t"){r.push(f);f=""}else if(ch=="\n"||ch=="\r"){if(ch=="\r"&&t[i+1]=="\n")i++;r.push(f);f="";R.push(r);r=[]}else f+=ch}
 if(f!==""||r.length){r.push(f);R.push(r)}while(R.length&&R[R.length-1].every(x=>!String(x).trim()))R.pop();return R}
@@ -137,23 +137,23 @@ files.push(["_rels/.rels",hd+`<Relationships xmlns="http://schemas.openxmlformat
 files.push(["xl/workbook.xml",hd+`<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="${R}"><bookViews><workbookView activeTab="0"/></bookViews><sheets>${sh.map((s,i)=>`<sheet name="${xa(s.nm)}" sheetId="${i+1}"${s.hid?' state="veryHidden"':""} r:id="rId${i+1}"/>`).join("")}</sheets></workbook>`]);
 files.push(["xl/_rels/workbook.xml.rels",hd+`<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sh.map((s,i)=>`<Relationship Id="rId${i+1}" Type="${R}/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join("")}<Relationship Id="rId${n+1}" Type="${R}/styles" Target="styles.xml"/></Relationships>`]);
 files.push(["xl/styles.xml",sb.xml()]);sx.forEach((x,i)=>files.push([`xl/worksheets/sheet${i+1}.xml`,x]));return files}
-function exportX(id){if(!EXPORT_ON)return;if(licSt().k!="actif"){xmShow(id);return}const p0=S.projects.find(x=>x.id==id);if(!p0)return;
+function exportX(id,libre,kind){if(!EXPORT_ON)return;if(!libre&&licSt().k!="actif"){xmShow(id);return}const p0=S.projects.find(x=>x.id==id);if(!p0)return;
 const sv={cur:S.cur,tab:S.tab,msg:S.msg,pz:S.pz,cand:CAND,sit:p0.sit,avn:p0.avn,sd:p0.sd};let fn="",files=null;
-try{S.cur=id;S.msg="";S.pz=false;CAND=[];const p=p0,sh=[],used=new Set(),wm=licSt().wm,dt=new Date().toLocaleDateString("fr-FR"),note=(wm?"VERSION D’ESSAI – ":"")+"Fichier en lecture seule – exporté de situation-dgd.com le "+dt+" – projet : "+p.name;
+try{S.cur=id;S.msg="";S.pz=false;CAND=[];const p=p0,sh=[],used=new Set(),wm=licSt().wm&&!libre,dt=new Date().toLocaleDateString("fr-FR"),note=(wm?"VERSION D’ESSAI – ":"")+"Fichier en lecture seule – exporté de situation-dgd.com le "+dt+" – projet : "+p.name;
 const add=(nm,pg,nt,wf)=>sh.push({nm:shName(nm,used),m:finSheet(pg,nt,wf,wm)});
 const cards=html=>{const d=document.createElement("div");d.innerHTML=String(html).replace(/<br\s*\/?>/gi,"\u2028");const o=[];[...d.children].forEach(c=>(c.classList.contains("land")?[...c.children]:[c]).forEach(x=>{if(!x.matches(".np")&&x.querySelector("table"))o.push(x)}));return o};
 const merge=cs=>{const A=[],MG=[],BR=[];cs.forEach((c,i)=>{const g=pageRows(c),o=A.length;if(i)BR.push(o);g.MG.forEach(m=>MG.push({r1:m.r1+o,c1:m.c1,r2:m.r2+o,c2:m.c2}));g.BR.forEach(b=>BR.push(b+o));g.A.forEach(r=>A.push(r))});return{A,MG,BR}};
 const put=(names,html)=>{const cs=cards(html);if(!cs.length)return;if(cs.length===names.length)cs.forEach((c,i)=>add(names[i],pageRows(c),note));else add(names[0],merge(cs),note)};
 const pc=(t,b)=>[{v:t,s:b?"p+b":"p",k:"para",l:t.length}];
-put(["Devis"],VW.devis(p));
+if(kind!="att")put(["Devis"],VW.devis(p));
 const hasD=k=>(p.val&&p.val[k])||p.items.some(it=>(it.m[k-1]||0)>0)||k==sv.sit;
 for(let k=1;k<=4;k++)if(hasD(k)){p.sit=k;put(["Attachement "+k],VW.attachement(p));put(["Décompte "+k,"Récap décompte "+k],VW.decompte(p));put(["Situation "+k],VW.situation(p))}
 p.sit=sv.sit;
-if(p.items.some(it=>it.m.some(x=>x>0))){p.sd=true;put(["Situation définitive"],VW.situation(p));p.sd=sv.sd}
+if(kind!="att"&&p.items.some(it=>it.m.some(x=>x>0))){p.sd=true;put(["Situation définitive"],VW.situation(p));p.sd=sv.sd}
 const av=new Set([sv.avn||1]);Object.keys(p.cp||{}).forEach(k=>{if(p.cp[k].length)av.add(+k)});p.items.forEach(it=>(it.av||[]).forEach((x,j)=>{if(x)av.add(j+1)}));
-[...av].sort((a,b)=>a-b).forEach(n=>{p.avn=n;put(["Avenant "+n+" - Supplémentaires","Avenant "+n+" - Diminution","Avenant "+n+" - Complémentaires","Avenant "+n+" - Récapitulatif","Avenant "+n+" - Nouveau devis"],VW.avenants(p))});
+if(kind!="att")[...av].sort((a,b)=>a-b).forEach(n=>{p.avn=n;put(["Avenant "+n+" - Supplémentaires","Avenant "+n+" - Diminution","Avenant "+n+" - Complémentaires","Avenant "+n+" - Récapitulatif","Avenant "+n+" - Nouveau devis"],VW.avenants(p))});
 p.avn=sv.avn;
-put(["DGD","Récap DGD"],VW.dgd(p));
+if(kind!="att"){const avMax=Math.max(0,...[...av].filter(x=>x<5&&(p.items.some(it=>(it.av||[])[x-1])||(p.cp&&p.cp[x]&&p.cp[x].length))));put([avMax?"Avenant "+avMax+" - DGD":"DGD","Récap DGD"],VW.dgd(p))};
 /* données de restauration (feuille très cachée) */
 const js=JSON.stringify({v:1,app:"archigest-dz",at:new Date().toISOString(),project:p}),R=[[{v:"ARCHIGEST-DZ-V1"}]];for(let i=0;i<js.length;i+=30000)R.push([{v:js.slice(i,i+30000)}]);
 sh.push({nm:"_archigest",hid:1,m:{A:R,MG:[],BR:[],W:[20],H:[],land:false}});
@@ -171,7 +171,7 @@ if(!ws){S.bm="Ce fichier ne contient pas de données de restauration situation-d
 const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:""});if(!rows.length||rows[0][0]!=="ARCHIGEST-DZ-V1")throw new Error("format");
 const o=JSON.parse(rows.slice(1).map(r=>r[0]).join("")),q=o&&o.project;
 if(!q||typeof q.name!=="string"||!Array.isArray(q.items)||!q.items.every(it=>it&&typeof it.d==="string"&&isFinite(it.q)&&isFinite(it.pu)&&Array.isArray(it.m)))throw new Error("contenu");
-q.id=Date.now()+Math.floor(Math.random()*1000);if(S.mode!="entreprise"){q.rs=1;let n="Devis restauré",k=1;while(S.projects.some(x=>x.grp===q.grp&&x.name===n))n="Devis restauré "+(++k);q.name=n}else if(S.projects.some(x=>x.name===q.name&&x.grp===q.grp))q.name+=" (restauré)";
+if(!q.id||S.projects.some(x=>x.id==q.id))q.id=Date.now()+Math.floor(Math.random()*1000);if(S.mode!="entreprise"){q.rs=1;let n="Devis restauré",k=1;while(S.projects.some(x=>x.grp===q.grp&&x.name===n))n="Devis restauré "+(++k);q.name=n}else if(S.projects.some(x=>x.name===q.name&&x.grp===q.grp))q.name+=" (restauré)";
 S.projects.push(q);S.cur=q.id;S.del=null;opn(q.id)}
 catch(x){S.bm="Fichier illisible ou endommagé : la restauration est impossible. Aucune donnée n’a été modifiée.";go()}};
 rd.onerror=()=>{S.bm="Lecture du fichier impossible.";go()};rd.readAsArrayBuffer(fl)}

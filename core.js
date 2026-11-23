@@ -32,7 +32,7 @@ if(!S||!S.projects)S={projects:[],cur:null,tab:"projets",del:null};
 S.tab="projets";S.cur=null;S.del=null;S.back=null;
 const save=()=>{try{localStorage.setItem("archigest_dz",JSON.stringify(S));OK=true}catch(e){OK=false}};
 const P=()=>S.projects.find(p=>p.id===S.cur);
-function mk(name){return{id:Date.now(),name,moa:"",ent:"",gar:"caution",contrat:"",objet:"",montant:0,doit:"",adr:"",rc:"",nif:"",nis:"",art:"",rib:"",bq:"",tva:19,ret:5,items:[],adj:{},sit:1}}
+function mk(name){return{id:Date.now(),name,moa:"",ent:"",gar:"caution",contrat:"",objet:"",montant:0,doit:"",adr:"",rc:"",nif:"",nis:"",art:"",rib:"",bq:"",tva:19,ret:5,items:[],adj:{},done:true,sit:1}}
 function setMode(m){S.mode=m;S.del=null;if(typeof licCnt=="function")licCnt("mode-"+m,"Mode "+(m=="bureau"?"Bureau":"Entrepreneur"));go()}
 function np(){npj()}
 function dp(){if(S.del==S.cur){S.projects=S.projects.filter(x=>x.id!=S.cur);S.cur=S.projects[0]?S.projects[0].id:null;S.del=null}else S.del=S.cur;go()}
@@ -78,3 +78,8 @@ const v=LIC.code&&licCheck(LIC.name,LIC.code);
 if(v)return(!v.exp||now<v.exp+LIC_DAY)?{k:"actif",name:LIC.name,exp:v.exp,wm:false}:{k:"exp",name:LIC.name,exp:v.exp,wm:true};
 if(!LIC.ts)return{k:"none",wm:true};const left=LIC_TRIAL-Math.floor((now-LIC.ts)/LIC_DAY);return left>0?{k:"essai",left,wm:true}:{k:"fin",wm:true}}
 (()=>{const st=document.createElement("style");st.textContent='@media print{body.wm::before{content:"VERSION D’ESSAI";position:fixed;top:38%;left:0;right:0;text-align:center;font-size:60px;font-weight:800;letter-spacing:2px;color:rgba(190,0,0,.16);transform:rotate(-28deg);z-index:9999;pointer-events:none;white-space:nowrap}}';document.head.appendChild(st)})();
+
+/* ===== Dossier (mode Entreprise) : l'OK est lié à la référence du projet, distinct des licences (autre empreinte) ===== */
+const dosHash=id=>h53(LIC_SECRET+"|DOSSIER|"+id).toString(36).toUpperCase().padStart(11,"0").slice(0,8);
+const dosCode=id=>{const c=dosHash(id);return c.slice(0,4)+"-"+c.slice(4)};
+const dosCheck=(id,code)=>{const c=String(code||"").toUpperCase().replace(/[^A-Z0-9]/g,"");return/^[0-9]+(-[0-9]+)?$/.test(String(id))&&c.length==8&&c===dosHash(id)};
