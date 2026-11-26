@@ -22,7 +22,7 @@ const TVx=(h,t)=>ta(ta(h)*t/100),TT=(h,t)=>ta(ta(h)+TVx(h,t));
 const D4=(h,t)=>{const H=h.map(ta);H[2]=ta(H[3]-H[1]);const V=[TVx(H[0],t),TVx(H[1],t),0,TVx(H[3],t)];V[2]=ta(V[3]-V[1]);return[H,V,H.map((x,i)=>ta(x+V[i]))]};
 /* DGD : colonnes [Marché, Réalisé, Plus-value, Moins-value] -> [HT, TVA, TTC] ; Marché + Plus − Moins = Réalisé, toujours exact */
 const DV=it=>{const a=Mt(it,it.qm),b=Mt(it,it.tot);return[a,b,Math.max(ta(b-a),0),Math.max(ta(a-b),0)]};
-const G4=(T,t)=>{const H=T.map(ta),vm=TVx(H[0],t),vr=TVx(H[1],t),dv=ta(vr-vm);let vp,vn;if(H[2]===0){vp=0;vn=ta(-dv)}else if(H[3]===0){vn=0;vp=dv}else{vp=TVx(H[2],t);vn=ta(vp-dv)}const V=[vm,vr,vp,vn];return[H,V,H.map((x,i)=>ta(x+V[i]))]};
+const G4=(T,t)=>{const H=T.map(ta),V=[TVx(H[0],t),TVx(H[1],t),TVx(H[2],t),TVx(H[3],t)];return[H,V,H.map((x,k)=>ta(x+V[k]))]};
 /* Situation : chaque étape est coupée à 2 chiffres (comme le calcul à la main du trésor) */
 const sitCalc=(r,a,b,q)=>{const T1=ta(r.cum+ta(a.af)+ta(a.aa)+ta(a.ao)),T2=ta(r.prev+ta(b.af)+ta(b.aa)+ta(b.ao)),br=ta(T1-T2),T4=ta(ta(a.rf)+ta(a.ra)+ta(a.ro)),ht=ta(br-T4),tva=TVx(ht,q.tva),ttc=ta(ht+tva),ret=(q.gar||"retenue")=="retenue",rt=ret?ta(ttc*q.ret/100):0,pen=ta(a.pen),net=ta(ttc-rt-pen),cau=ta(TT(r.mm,q.tva)*q.ret/100);return{T1,T2,br,T4,ht,tva,ttc,ret,rt,pen,net,cau}};
 const esc=s=>String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
