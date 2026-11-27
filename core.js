@@ -56,7 +56,7 @@ r.mi+=Mt(it,it.q);r.mm+=Mq(it);r.avm+=ta(Mq(it)-Mt(it,it.q));r.mk+=Mt(it,it.qa);
 Object.keys(r).forEach(k=>r[k]=ta(r[k]));
 return r}
 const fp=x=>fmt(x);
-const idBlock=p=>{const g=(l,v)=>v?`<div>${l} ${esc(v)}</div>`:"";return`<div style="font-size:12px;line-height:1.5"><div style="text-align:center;font-weight:700">République Algérienne Démocratique et Populaire</div>${g("",p.ent)}${g("Adresse :",p.adr)}${g("RC :",p.rc)}${g("NIF :",p.nif)}${g("NIS :",p.nis)}${g("N° d’article :",p.art)}${g("N° de compte :",(p.rib||"")+(p.bq?" · "+p.bq:""))}${g("Contrat n°",p.contrat)}${g("Objet :",p.objet)}${p.montant?g("Montant du contrat :",fmt(p.montant)+" DA"):""}${g("Doit à :",p.doit)}${g("Projet :",p.name)}</div>`};
+const idBlock=p=>{const g=(l,v)=>v?`<div>${l} ${esc(v)}</div>`:"";return`<div style="font-size:12px;line-height:1.5"><div style="text-align:center;font-weight:700">République Algérienne Démocratique et Populaire</div>${p.ent?`<div>Nom : ${esc(p.ent)}</div>`:""}${g("Adresse :",p.adr)}${g("RC :",p.rc)}${g("NIF :",p.nif)}${g("NIS :",p.nis)}${g("N° d’article :",p.art)}${g("N° de compte :",(p.rib||"")+(p.bq?" · "+p.bq:""))}${g("Contrat n°",p.contrat)}${g("Objet :",p.objet)}${p.montant?g("Montant du contrat :",fmt(p.montant)+" DA"):""}${g("Doit à :",p.doit)}</div>`};
 function sv(i,k,v){P().items[i].av[k]=v;go()}
 const L=(l,v,c)=>`<tr class="${c||""}"><td>${l}</td><td class="r">${v}</td></tr>`;
 const okTo=(p,m)=>{for(let k=1;k<m;k++)if(!(p.val&&p.val[k]))return false;return true};
@@ -80,6 +80,7 @@ function licSt(){const t=Date.now(),now=Math.max(t,LIC.ls||0);if(now-(LIC.ls||0)
 const v=LIC.code&&licCheck(LIC.name,LIC.code);
 if(v)return(!v.exp||now<v.exp+LIC_DAY)?{k:"actif",name:LIC.name,exp:v.exp,wm:false}:{k:"exp",name:LIC.name,exp:v.exp,wm:true};
 if(!LIC.ts)return{k:"none",wm:true};const left=LIC_TRIAL-Math.floor((now-LIC.ts)/LIC_DAY);return left>0?{k:"essai",left,wm:true}:{k:"fin",wm:true}}
+(()=>{const st=document.createElement("style");st.textContent='@media print{.np-prt{display:none!important}}th,h3,.card>b{visibility:visible!important}@media print{th,h3,.card>b{color:#000!important;visibility:visible!important}}';document.head.appendChild(st)})();
 (()=>{const st=document.createElement("style");st.textContent='@media print{body.wm::before{content:"VERSION D’ESSAI";position:fixed;top:38%;left:0;right:0;text-align:center;font-size:60px;font-weight:800;letter-spacing:2px;color:rgba(190,0,0,.16);transform:rotate(-28deg);z-index:9999;pointer-events:none;white-space:nowrap}}';document.head.appendChild(st)})();
 
 /* ===== Dossier (mode Entreprise) : l'OK est lié à la référence du projet, distinct des licences (autre empreinte) ===== */
