@@ -32,20 +32,23 @@ if(!S||!S.projects)S={projects:[],cur:null,tab:"projets",del:null};
 S.tab="projets";S.cur=null;S.del=null;S.back=null;
 const save=()=>{try{localStorage.setItem("archigest_dz",JSON.stringify(S));OK=true}catch(e){OK=false}};
 const P=()=>S.projects.find(p=>p.id===S.cur);
+const lockSit=p=>{const d=(p&&p.dgdSit)||{},v=Object.keys((p&&p.dgdv)||{}).map(k=>d[k]||0);return v.length?Math.max(...v):0};
+const projLocked=p=>!!(p&&p.dgdv&&Object.keys(p.dgdv).length);
+const finAtt=p=>!!(p&&projLocked(p));
 function mk(name){return{id:Date.now(),name,moa:"",ent:"",gar:"caution",contrat:"",objet:"",montant:0,doit:"",adr:"",rc:"",nif:"",nis:"",art:"",rib:"",bq:"",tva:19,ret:5,items:[],adj:{},done:true,sit:1}}
 function setMode(m){S.mode=m;S.del=null;if(typeof licCnt=="function")licCnt("mode-"+m,"Mode "+(m=="bureau"?"Bureau":"Entrepreneur"));go()}
 function np(){npj()}
 function dp(){if(S.del==S.cur){S.projects=S.projects.filter(x=>x.id!=S.cur);S.cur=S.projects[0]?S.projects[0].id:null;S.del=null}else S.del=S.cur;go()}
 function go(t){if(t){if(t=="infos"&&S.tab!="infos")S.prev=S.tab;S.tab=t;S.msg="";S.bm="";S.sm="";if(t!="projets")S.nw=false;const q=S.cur&&S.projects.find(x=>x.id==S.cur);if(q&&/^(devis|attachement|decompte|situation|avenants|dgd)$/.test(t))q.lt=t}save();render()}
 function set(k,v){P()[k]=v;go()}
-function ai(){P().items.push({d:"",u:"m²",q:0,pu:0,m:Array(12).fill(0),av:[0,0,0]});go()}
-function di(i){P().items.splice(i,1);go()}
-function si(i,k,v){P().items[i][k]=v;go()}
-function sm(i,v){const p=P();if(p.val&&p.val[p.sit])return;p.items[i].m[p.sit-1]=v;go()}
-function sa(k,v){const p=P();(p.adj[p.sit]=p.adj[p.sit]||{av:0,pen:0})[k]=v;go()}
-const IT=it=>{it.av=it.av||[];while(it.av.length<12)it.av.push(0);const t=x=>tz(it,x);it.qm=t(t(it.q)+it.av.reduce((a,b)=>a+t(b),0));it.qa=it.qm;return it};
+function ai(){if(projLocked(P()))return;P().items.push({d:"",u:"m²",q:0,pu:0,m:Array(12).fill(0),av:[0,0,0]});go()}
+function di(i){if(projLocked(P()))return;P().items.splice(i,1);go()}
+function si(i,k,v){if(projLocked(P()))return;P().items[i][k]=v;go()}
+function sm(i,v){const p=P();if((p.val&&p.val[p.sit])||p.sit<=lockSit(p)||finAtt(p))return;p.items[i].m[p.sit-1]=v;go()}
+function sa(k,v){const p=P();if(p.sit<=lockSit(p)||finAtt(p))return;(p.adj[p.sit]=p.adj[p.sit]||{av:0,pen:0})[k]=v;go()}
+const IT=it=>{it.av=it.av||[];while(it.av.length<12)it.av.push(0);const t=x=>tz(it,x);const p0=P(),s0=p0?(p0.sit||1):1,ds=(p0&&p0.dgdSit)||{};it.qm=t(t(it.q)+Object.keys(it.fz||{}).filter(k=>(ds[k]||0)<s0).reduce((a,k)=>a+t(it.fz[k]),0));it.qa=it.qm;return it};
 function calc(p){const n=p.sit,r={prev:0,mois:0,cum:0,mi:0,avm:0,mk:0,real:0,pv:0,mv:0,mm:0};
-p.items.forEach(it=>{IT(it);const t=x=>tz(it,x),sum=k=>t(it.m.slice(0,k).reduce((a,b)=>a+t(b),0)),tot=sum(12),pl=t(Math.max(tot-it.qm,0)),mn=p.done?t(Math.max(it.qm-tot,0)):0;
+p.items.forEach(it=>{IT(it);const t=x=>tz(it,x),sum=k=>t(it.m.slice(0,k).reduce((a,b)=>a+t(b),0)+(it.rz&&k>it.rz.from?it.rz.q:0)),tot=sum(12),pl=t(Math.max(tot-it.qm,0)),mn=p.done?t(Math.max(it.qm-tot,0)):0;
 it.qa=t(it.qm+pl-mn);it.au=t(pl-mn);
 const cap=k=>Math.min(sum(k),it.qm),pr=cap(n-1),cu=cap(n);
 Object.assign(it,{pr,cu,mo:t(cu-pr),tot,rawp:sum(n-1),raw:sum(n),mr:it.m[n-1]||0});
@@ -59,7 +62,7 @@ const L=(l,v,c)=>`<tr class="${c||""}"><td>${l}</td><td class="r">${v}</td></tr>
 const okTo=(p,m)=>{for(let k=1;k<m;k++)if(!(p.val&&p.val[k]))return false;return true};
 const selS=(p,lb)=>`<div class="card row np"><label style="width:150px">${lb||"Situation"} n°<select onchange="gs(+this.value)">${[...Array(4)].map((_,i)=>`<option value="${i+1}" ${i+1==p.sit?"selected":""} ${okTo(p,i+1)?"":"disabled"}>${i+1}${p.val&&p.val[i+1]?" ✓":""}</option>`).join("")}</select></label>${S.sm?`<span class="bad">${esc(S.sm)}</span>`:""}</div>`;
 function gs(v){const p=P();if(!okTo(p,v)){let k=1;while(p.val&&p.val[k])k++;S.sm="Validez d’abord l’attachement n° "+k+" pour passer au suivant.";go();return}S.sm="";p.sit=v;p.sd=false;go()}
-function nx(){const p=P();if(p.sit<4&&p.val&&p.val[p.sit]){p.sit++;S.sm=""}go()}
+function nx(){const p=P();if(finAtt(p))return;if(p.sit<4&&p.val&&p.val[p.sit]){p.sit++;S.sm=""}go()}
 
 /* ===== Licence : bouton « Essayer » = 30 jours (LIC.ts) avec filigrane « VERSION D’ESSAI » à l’impression ; l’export Excel exige un code ; code valide = tout ouvert ===== */
 const LIC_SECRET="89737dff280f36580736",LIC_DAY=864e5,LIC_D0=Date.UTC(2024,0,1),LIC_TRIAL=30,LIC_AUTO=false; /* LIC_AUTO=false : aucun essai libre, un code (d’essai ou d’activation) est nécessaire pour créer un projet · true : 30 jours libres dès le premier lancement */
