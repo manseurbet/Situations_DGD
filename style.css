@@ -53,7 +53,10 @@ input[type=number]{-moz-appearance:textfield}
 .sig{display:none}
 @media print{
 :root,:root:not([data-theme="light"]),:root[data-theme="dark"]{--bg:#fff;--card:#fff;--tx:#000;--mut:#000;--ln:#888;--in:#fff;--bad:#000;color-scheme:light;padding:0}
-header,nav,.np,#apropos{display:none!important}
+header,nav,#apropos{display:none!important}
+.np{border:0!important;padding:0!important;margin:0!important;background:none!important}
+.np>*:not(b){display:none!important}
+.np>b{display:block;margin:4px 0}
 body{background:#fff;color:#000;font-size:11px}
 main{max-width:none;padding:0}
 .card{border:0;border-radius:0;padding:0;margin:0 0 6px}
