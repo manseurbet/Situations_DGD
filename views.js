@@ -8,7 +8,7 @@ const dsc=()=>{const dl=[...new Set(S.projects.map(x=>x.grp).filter(Boolean))].f
 /* ================================================================
    PROJETS — créer, renommer, supprimer un projet et ses devis
    ================================================================ */
-const PJ=p=>`${p.ent?"<div>Nom : "+esc(p.ent)+"</div>":""}<div>Nom du devis : ${esc(p.name)}</div>`;
+const PJ=p=>p.ent?`<div>Nom : ${esc(p.ent)}</div>`:"";
 function mg(){S.eg=(S.eg||[]).filter(g=>!S.projects.some(x=>x.grp===g));if(S.mode=="entreprise"||!S.mode)return;const used=new Set(S.projects.map(x=>x.grp).filter(Boolean));S.projects.forEach(x=>{if(x.grp)return;let g=x.name||"Projet",c=g,n=1;while(used.has(c))c=g+" ("+(++n)+")";x.grp=c;used.add(c)})}
 function npj(){const e=S.mode=="entreprise";if(e&&S.projects.length){opn(S.projects[0].id);return}if(!licGate())return;if(e&&S.entUsed){S.bm="Un seul dossier.";go();return}S.nw=true;S.nwm="";go("projets");setTimeout(()=>{const x=document.getElementById("nwn");if(x)x.focus()},80)}
 function cpj(v){v=(v||"").trim();if(!v){S.nwm="Nom ?";go();setTimeout(()=>{const x=document.getElementById("nwn");if(x)x.focus()},80);return}if(!licGate())return;mg();const e=S.mode=="entreprise";if(!e&&(S.projects.some(x=>x.grp===v)||(S.eg||[]).includes(v))){S.nwm="Nom déjà pris.";go();return}licCnt("projet-cree","Projet créé");const p=mk(e?v:"Devis 1");p.id=Date.now()+Math.floor(Math.random()*1000);if(e)S.entUsed=true;else{licCnt("devis-cree","Devis créé");p.grp=v}S.projects.push(p);S.cur=p.id;S.nw=false;S.nwm="";S.del=null;go("devis")}
@@ -250,9 +250,9 @@ const C=x=>`<td class="r">${fp(x)}</td>`,N=ms.map(q=>({q,s:avNums(q,n),mi:calc(q
 const pg=(key,tk,ttl,sg)=>{const tot=N.reduce((a,x)=>ta(a+x.s[tk]),0),tv=N.reduce((a,x)=>ta(a+TVx(x.s[tk],x.q.tva)),0),rows=N.map(({q,s})=>`<tr><td colspan="3"><b>${esc(q.name)}</b></td></tr>`+(Object.keys(s[key]).length?Object.entries(s[key]).map(([k,v])=>{const m=k.match(/^(LOT\s*\d+\s*\)?)\s*(.*)$/i);return`<tr><td>${esc(m?m[1]:"")}</td><td>${esc(m?m[2]:k)}</td>${C(v)}</tr>`}).join(""):`<tr><td colspan="3"><i>Aucun article.</i></td></tr>`)+`<tr class="tot"><td colspan="2">TOTAL ${esc(q.name)} ( H.T )</td>${C(s[tk])}</tr>`).join("");
 return`<div class="card sc${sg?" pgb":""}">${hdr(p)}<b>RÉCAPITULATIVE GÉNÉRALE – ${AVL(n)} : ${ttl}</b> (DA)<table style="margin-top:6px"><tr><th>N°</th><th>Désignation des ouvrages</th><th class="r">Montant</th></tr>${rows}<tr class="tot"><td colspan="2">TOTAL GÉNÉRAL en H.T</td>${C(tot)}</tr><tr class="tot"><td colspan="2">${tl("T.V.A")}</td>${C(tv)}</tr><tr class="tot"><td colspan="2">TOTAL GÉNÉRAL en T.T.C</td>${C(ta(tot+tv))}</tr></table><p>Arrêté le montant à la somme de (en TTC) :<br><b>${lettres(ta(tot+tv),1)}</b></p></div>`};
 const rc=N.map(({q,s,mi})=>`<tr><td>${esc(q.name)}</td>${[mi,s.prT,s.TA,s.TC,s.TB,ta(s.prT+s.TA+s.TC-s.TB)].map(C).join("")}</tr>`).join(""),sm=f=>N.reduce((a,x)=>ta(a+f(x)),0),nv=sm(x=>ta(x.s.prT+x.s.TA+x.s.TC-x.s.TB)),nvt=sm(x=>TVx(x.s.prT+x.s.TA+x.s.TC-x.s.TB,x.q.tva));
-return selA(p)+gnav("a")+pg("A","TA","TRAVAUX SUPPLÉMENTAIRES",false)+"\n"+pg("C","TC","TRAVAUX COMPLÉMENTAIRES",true)+"\n"+pg("B","TB","TRAVAUX EN DIMINUTION",true)+`
+return `<div class="land">`+selA(p)+gnav("a")+pg("A","TA","TRAVAUX SUPPLÉMENTAIRES",false)+"\n"+pg("C","TC","TRAVAUX COMPLÉMENTAIRES",true)+"\n"+pg("B","TB","TRAVAUX EN DIMINUTION",true)+`
 <div class="card sc pgb">${hdr(p)}<b>RÉCAPITULATIF GÉNÉRAL – ${AVL(n)}</b> (DA)<table style="margin-top:6px"><tr><th>Devis</th><th class="r">Marché initial</th><th class="r">Avant avenant</th><th class="r">+ Supplémentaires</th><th class="r">+ Complémentaires</th><th class="r">− Diminution</th><th class="r">Nouveau marché</th></tr>${rc}<tr class="tot"><td>TOTAL GÉNÉRAL en H.T</td>${[sm(x=>x.mi),sm(x=>x.s.prT),sm(x=>x.s.TA),sm(x=>x.s.TC),sm(x=>x.s.TB),nv].map(C).join("")}</tr><tr class="tot"><td colspan="6">${tl("T.V.A")}</td>${C(nvt)}</tr><tr class="tot"><td colspan="6">NOUVEAU MONTANT DU MARCHÉ EN T.T.C</td>${C(ta(nv+nvt))}</tr></table></div>
-<div class="row np">${PB()}</div>`}
+<div class="row np">${PB()}</div></div>`}
 
 /* ================================================================
    RÉCAPITULATIVE GÉNÉRALE — DGD
@@ -288,7 +288,7 @@ ${cau>0?`<div style="color:var(--mut);font-size:12px;margin-top:6px">Caution de 
 <p>Le montant net à payer par la présente situation s’élève à la somme de ( en toutes taxes ) :<br><b>${lettres(net,0)}</b></p>
 <b style="display:block;margin-top:10px">Détail par devis</b><table style="margin-top:6px"><tr><th>Devis</th><th class="r">Montant HT</th><th class="r">T.V.A</th><th class="r">TTC</th><th class="r">Retenue</th><th class="r">Pénalités</th><th class="r">Net à payer</th></tr>${det}${dt}</table>
 <div style="margin-top:8px">Fait à …………… le ……………</div></div>`;
-return selS(p,part=="s"?"Situation":"Décompte")+gnav(part)+(part=="s"?c2:c1)+`<div class="row np">${PB()}</div>`}
+return selS(p,part=="s"?"Situation":"Décompte")+gnav(part)+(part=="s"?c2+`<div class="row np">${PB()}</div>`:`<div class="land">`+c1+`<div class="row np">${PB()}</div></div>`)}
 
 /* ================================================================
    AFFICHAGE — table des pages (VW) et render()
