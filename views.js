@@ -157,7 +157,7 @@ ${ret?"":`<div style="color:var(--mut);font-size:12px;margin-top:6px">Caution de
 <p>Le montant net à payer par la présente situation s’élève à la somme de ( en toutes taxes ) :<br><b>${lettres(net,0)}</b></p>
 <div style="margin-top:8px">Fait à …………… le ……………</div>
 <div class="row np" style="margin-top:10px">${PB("pri")}<button onclick="go('infos')">👷 Entrepreneur et contrat</button></div></div>`}
-const selA=p=>`<div class="card np"><label style="width:200px">Avenant<select onchange="set('avn',+this.value)">${[...Array(5)].map((_,i)=>`<option value="${i+1}" ${i+1==(p.avn||1)?"selected":""}>${i==4?"Avenant de clôture":i+1}</option>`).join("")}</select></label></div>`;
+const selA=p=>{const dv=p.dgdv||{};return `<div class="card np"><label style="width:200px">Avenant<select onchange="set('avn',+this.value)">${[...Array(5)].map((_,i)=>{const k=i+1,ok=k==5||!!dv[k];return `<option value="${k}" ${k==(p.avn||1)?"selected":""} ${ok?"":"disabled"}>${k==5?"Avenant de clôture":k+(dv[k]?" ✓":"")}</option>`}).join("")}</select></label></div>`};
 function sq(i,v){const p=P(),it=p.items[i],n=p.avn||1;if(projLocked(p))return;IT(it);it.av[n-1]=Math.round((v-it.q-it.av.slice(0,n-1).reduce((a,b)=>a+b,0))*1e6)/1e6;go()}
 
 /* ================================================================
@@ -174,7 +174,7 @@ function cpA(){const p=P(),n=p.avn||1;if((p.cpImp&&p.cpImp[n])||dgdOk(p))return;
 function cpS(i,k,v){const p=P();if((p.cpImp&&p.cpImp[p.avn||1])||dgdOk(p))return;cpL(p,p.avn||1)[i][k]=v;go()}
 function cpD(i){const p=P();if((p.cpImp&&p.cpImp[p.avn||1])||dgdOk(p))return;cpL(p,p.avn||1).splice(i,1);go()}
 function cpUnlock(){const p=P(),n=p.avn||1;if(dgdOk(p))return;if(p.cp)delete p.cp[n];if(p.cpImp)delete p.cpImp[n];S.msg="";go()}
-function vAv(p){if((p.avn||1)==5)return selA(p)+clotCard(p);const r=calc(p),n=p.avn||1,ln=Math.max(0,...p.items.flatMap(it=>it.av.map((x,k)=>x?k+1:0))),au=n==Math.max(n,ln),R6=x=>Math.round(x*1e6)/1e6;
+function vAv(p){if((p.avn||1)==5)return selA(p)+clotCard(p);if(!(p.dgdv&&p.dgdv[p.avn||1]))return selA(p)+`<div class="card np"><p>Validez le DGD n° ${p.avn||1} pour générer l’avenant n° ${p.avn||1}.</p></div>`;const r=calc(p),n=p.avn||1,ln=Math.max(0,...p.items.flatMap(it=>it.av.map((x,k)=>x?k+1:0))),au=n==Math.max(n,ln),R6=x=>Math.round(x*1e6)/1e6;
 let prT=0;const L=p.items.map((it,i)=>{const t=x=>tz(it,x),pr=t(t(it.q)+it.av.slice(0,n-1).reduce((a,b)=>a+t(b),0)),nq=t(au?it.qa:pr+t(it.av[n-1]||0));prT=ta(prT+Mt(it,pr));return{it,i,d:t(nq-pr),v:ta(Mt(it,nq)-Mt(it,pr))}});
 const pg=sg=>{const ls=L.filter(x=>sg*x.d>1e-9),sl=lot=>ls.filter(y=>y.it.lot===lot).reduce((a,y)=>ta(a+sg*y.v),0);let T=0;
 const rows=ls.map((x,j)=>{const it=x.it,q=sg*x.d,m=sg*x.v,pv=ls[j-1],nx=ls[j+1];T=ta(T+m);
