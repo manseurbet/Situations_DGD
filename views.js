@@ -8,7 +8,7 @@ const dsc=()=>{const dl=[...new Set(S.projects.map(x=>x.grp).filter(Boolean))].f
 /* ================================================================
    PROJETS — créer, renommer, supprimer un projet et ses devis
    ================================================================ */
-const PJ=p=>p.grp&&S.mode!="entreprise"?`<div>PROJET : ${esc(p.grp)}</div><div>DEVIS : ${esc(p.name)}</div>`:`<div>PROJET : ${esc(p.name)}</div>`;
+const PJ=p=>`${p.ent?"<div>Nom : "+esc(p.ent)+"</div>":""}<div>Nom du devis : ${esc(p.name)}</div>`;
 function mg(){S.eg=(S.eg||[]).filter(g=>!S.projects.some(x=>x.grp===g));if(S.mode=="entreprise"||!S.mode)return;const used=new Set(S.projects.map(x=>x.grp).filter(Boolean));S.projects.forEach(x=>{if(x.grp)return;let g=x.name||"Projet",c=g,n=1;while(used.has(c))c=g+" ("+(++n)+")";x.grp=c;used.add(c)})}
 function npj(){const e=S.mode=="entreprise";if(e&&S.projects.length){opn(S.projects[0].id);return}if(!licGate())return;if(e&&S.entUsed){S.bm="Un seul dossier.";go();return}S.nw=true;S.nwm="";go("projets");setTimeout(()=>{const x=document.getElementById("nwn");if(x)x.focus()},80)}
 function cpj(v){v=(v||"").trim();if(!v){S.nwm="Nom ?";go();setTimeout(()=>{const x=document.getElementById("nwn");if(x)x.focus()},80);return}if(!licGate())return;mg();const e=S.mode=="entreprise";if(!e&&(S.projects.some(x=>x.grp===v)||(S.eg||[]).includes(v))){S.nwm="Nom déjà pris.";go();return}licCnt("projet-cree","Projet créé");const p=mk(e?v:"Devis 1");p.id=Date.now()+Math.floor(Math.random()*1000);if(e)S.entUsed=true;else{licCnt("devis-cree","Devis créé");p.grp=v}S.projects.push(p);S.cur=p.id;S.nw=false;S.nwm="";S.del=null;go("devis")}
@@ -245,7 +245,7 @@ const C={};cpL(q,n).forEach(c=>{const k=(c.n?c.n+" – ":"")+c.d,m=cpM(c);C[k]=t
    RÉCAPITULATIVE GÉNÉRALE — AVENANTS
    ================================================================ */
 function vRecA(p){const ms=GM(p),n=p.avn||1;
-if(ms.length<2)return`<div class="card">Ce projet ne contient qu’un seul devis. Dans « Ouvrir », le bouton « ➕ Devis » permet d’en ajouter.</div>`;
+
 const C=x=>`<td class="r">${fp(x)}</td>`,N=ms.map(q=>({q,s:avNums(q,n),mi:calc(q).mi})),same=ms.every(q=>q.tva==ms[0].tva),tl=(l)=>l+(same?" "+ms[0].tva+" %":"");
 const pg=(key,tk,ttl,sg)=>{const tot=N.reduce((a,x)=>ta(a+x.s[tk]),0),tv=N.reduce((a,x)=>ta(a+TVx(x.s[tk],x.q.tva)),0),rows=N.map(({q,s})=>`<tr><td colspan="3"><b>${esc(q.name)}</b></td></tr>`+(Object.keys(s[key]).length?Object.entries(s[key]).map(([k,v])=>{const m=k.match(/^(LOT\s*\d+\s*\)?)\s*(.*)$/i);return`<tr><td>${esc(m?m[1]:"")}</td><td>${esc(m?m[2]:k)}</td>${C(v)}</tr>`}).join(""):`<tr><td colspan="3"><i>Aucun article.</i></td></tr>`)+`<tr class="tot"><td colspan="2">TOTAL ${esc(q.name)} ( H.T )</td>${C(s[tk])}</tr>`).join("");
 return`<div class="card sc${sg?" pgb":""}">${hdr(p)}<b>RÉCAPITULATIVE GÉNÉRALE – ${AVL(n)} : ${ttl}</b> (DA)<table style="margin-top:6px"><tr><th>N°</th><th>Désignation des ouvrages</th><th class="r">Montant</th></tr>${rows}<tr class="tot"><td colspan="2">TOTAL GÉNÉRAL en H.T</td>${C(tot)}</tr><tr class="tot"><td colspan="2">${tl("T.V.A")}</td>${C(tv)}</tr><tr class="tot"><td colspan="2">TOTAL GÉNÉRAL en T.T.C</td>${C(ta(tot+tv))}</tr></table><p>Arrêté le montant à la somme de (en TTC) :<br><b>${lettres(ta(tot+tv),1)}</b></p></div>`};
@@ -258,7 +258,7 @@ return selA(p)+gnav("a")+pg("A","TA","TRAVAUX SUPPLÉMENTAIRES",false)+"\n"+pg("
    RÉCAPITULATIVE GÉNÉRALE — DGD
    ================================================================ */
 function vRecD(p){const ms=GM(p);
-if(ms.length<2)return`<div class="card">Ce projet ne contient qu’un seul devis. Dans « Ouvrir », le bouton « ➕ Devis » permet d’en ajouter.</div>`;
+
 const C=(x,j)=>`<td class="r">${fp(x)}</td>`,N=ms.map(q=>{calc(q);const G={},T=[0,0,0,0];q.items.forEach(it=>{const v=DV(it),k=it.lot||"Sans lot",o=G[k]=G[k]||[0,0,0,0];v.forEach((x,j)=>{o[j]=ta(o[j]+x);T[j]=ta(T[j]+x)})});return{q,G,T}}),
 tot=[0,1,2,3].map(j=>N.reduce((a,x)=>ta(a+x.T[j]),0)),tvc=[0,1,2,3].map(j=>N.reduce((a,x)=>ta(a+G4(x.T,x.q.tva)[1][j]),0)),same=ms.every(q=>q.tva==ms[0].tva);
 const rows=N.map(({q,G,T})=>`<tr><td colspan="6"><b>${esc(q.name)}</b></td></tr>`+Object.entries(G).map(([k,o])=>{const m=k.match(/^(LOT\s*\d+\s*\)?)\s*(.*)$/i);return`<tr><td>${esc(m?m[1]:"")}</td><td>${esc(m?m[2]:k)}</td>${o.map(C).join("")}</tr>`}).join("")+`<tr class="tot"><td colspan="2">TOTAL ${esc(q.name)} ( H.T )</td>${T.map(C).join("")}</tr>`).join("");
@@ -272,7 +272,7 @@ return gnav("d")+`<div class="land"><div class="card sc">${hdr(p)}<b>RÉCAPITULA
 function vRecG(p){return vRecGen(p,"g")}
 function vRecS(p){return vRecGen(p,"s")}
 function vRecGen(p,part){const n=p.sit,ms=GM(p);
-if(ms.length<2)return selS(p,part=="s"?"Situation":"Décompte")+`<div class="card">Ce projet ne contient qu’un seul devis. Dans « Ouvrir », le bouton « ➕ Devis » permet d’en ajouter.</div>`;
+
 const C=x=>`<td class="r">${fp(x)}</td>`,N=ms.map(q=>({q,s:sitNums(q,n)})),cs=s=>[0,1,2,3].map(i=>Object.values(s.g).reduce((a,o)=>ta(a+o[i]),0)),
 sm=f=>N.reduce((a,x)=>ta(a+f(x.s,x.q)),0),same=ms.every(q=>q.tva==ms[0].tva);
 const rows=N.map(({q,s})=>`<tr><td colspan="6"><b>${esc(q.name)}</b></td></tr>`+Object.entries(s.g).map(([k,o])=>{const m=k.match(/^(LOT\s*\d+\s*\)?)\s*(.*)$/i);return`<tr><td>${esc(m?m[1]:"")}</td><td>${esc(m?m[2]:k)}</td>${o.map(C).join("")}</tr>`}).join("")+`<tr class="tot"><td colspan="2">TOTAL ${esc(q.name)} ( H.T )</td>${cs(s).map(C).join("")}</tr>`).join("");
